@@ -181,12 +181,31 @@ class TextChannel
     {
         $messageText = $message->content;
         if($message->author->bot != 1) {
-            if(strpos($messageText, 'splite') !== false) {
+            if($messageText == 'help') {
+                $this->helpCommand($message, $discord);
+            } else if(strpos($messageText, 'splite') !== false) {
                 $this->spliteCommand($message, $discord);
             } else {
                 $this->notFoundCommand($discord);
             }
         }
+    }
+
+    /**
+     * Возвращает список команд бота
+     * @param Message $message
+     * @param Discord $discord
+     * @return void
+     */
+    private function helpCommand(Message $message, Discord $discord)
+    {
+        $helpString = ">>> **Список команд бота**" . PHP_EOL .
+            "1. splite [Id_Комнаты] - Команда разделяет участников на 2 команды";
+
+        $channelBot = $discord->getChannel(self::ID_CHANEL_BOT);
+        $channelBot->sendMessage($helpString);
+
+        LogService::setLog('Пользователь: ' . $message->author->username . '. Запустил команду **help**');
     }
 
     /**
@@ -197,7 +216,6 @@ class TextChannel
      */
     private function spliteCommand(Message $message, Discord $discord)
     {
-
         $messageText = $message->content;
         $idChannel = substr($messageText, 7);
         $channel = $discord->getChannel($idChannel);
@@ -217,6 +235,8 @@ class TextChannel
                 'id' => $member['user_id'],
             ];
         }
+
+        shuffle($arrayMembers);
 
         $guild = $channel->guild;
         $voiceChannel = $this->getNameChannel(2);
@@ -249,7 +269,7 @@ class TextChannel
             });
         });
 
-        LogService::setLog('Пользователе: ' . $message->author->username . '. Запустил команду splite');
+        LogService::setLog('Пользователь: ' . $message->author->username . '. Запустил команду splite');
     }
 
     /**
