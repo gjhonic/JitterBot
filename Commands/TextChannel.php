@@ -98,6 +98,8 @@ class TextChannel
                     $messagesIds[] = $message->id;
                 }
 
+                $messageArray = array_reverse($messageArray);
+
                 if($messageArray === []) {
                     $discord->close();
                 }
@@ -119,6 +121,62 @@ class TextChannel
         }
     }
 
+    /**
+     * Метод чистит текстовый чат для ввоба команд боту
+     * @param Discord $discord
+     * @return void
+     */
+    public function clearBotTextChat(Discord $discord)
+    {
+        try {
+            $channel = $discord->getChannel(self::ID_CHANEL_BOT);
+
+            $channel->getMessageHistory([
+            ])->done(function (Collection $messages) use ($discord, $channel) {
+
+                $messageArray = [];
+                $messagesIds = [];
+
+                foreach ($messages as $message) {
+
+                    $messageArray[] = [
+                        'id' => $message->id,
+                        'content' => $message->content,
+                        'author' => $message->author->username,
+                        'author_id' => $message->author->id,
+                    ];
+                    $messagesIds[] = $message->id;
+                }
+
+                $messageArray = array_reverse($messageArray);
+
+                if($messageArray === []) {
+                    $discord->close();
+                }
+
+                $channel->deleteMessages($messagesIds)->done(function () use ($discord, $messageArray) {
+                    $messagesStr = 'Бот отчистил bot чат' . PHP_EOL . 'Сообщений: ' . count($messageArray) . ' ```md' . PHP_EOL;
+                    foreach ($messageArray as $item) {
+                        $messagesStr .= '[AuthorId:' . $item['author_id'] . '] ' .
+                            $item['author'] . ' >>> ' . $item['content'] . PHP_EOL;
+                    }
+                    $messagesStr .= '```';
+
+                    LogService::setLog($messagesStr, true);
+                });
+            });
+
+        } catch (\Exception $e) {
+            $discord->close();
+        }
+    }
+
+    /**
+     * Метод обрабатывает команды с текстового канала бот
+     * @param Message $message
+     * @param Discord $discord
+     * @return void
+     */
     private function processChannelBot(Message $message, Discord $discord)
     {
         $messageText = $message->content;
