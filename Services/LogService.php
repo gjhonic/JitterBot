@@ -21,13 +21,13 @@ class LogService
     public static function setLog(string $message, bool $isDie = false)
     {
         $discord = \SingleDiscord::getInstance();
-        $chanel = $discord->getChannel(self::getIdTextChannelLog());
+        $channel = $discord->getChannel(self::getIdTextChannelLog());
         if($isDie == true) {
-            $chanel->sendMessage($message)->done(function () use ($discord) {
+            $channel->sendMessage($message)->done(function () use ($discord) {
                 $discord->close();
             });
         } else {
-            $chanel->sendMessage($message);
+            $channel->sendMessage($message);
         }
 
     }

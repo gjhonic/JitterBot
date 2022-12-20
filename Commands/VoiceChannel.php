@@ -13,8 +13,8 @@ use Discord\Parts\WebSockets\VoiceStateUpdate;
 class VoiceChannel
 {
     //Id канала для создания канала
-    private const ID_CHANEL_FOR_CREATE = '1054000370516504636';
-    private const ID_CATEGORY_VOICE_CHANNEL = '1051844725663072347';
+    public const ID_CHANEL_FOR_CREATE = '1054000370516504636';
+    public const ID_CATEGORY_VOICE_CHANNEL = '1051844725663072347';
 
     /**
      * Метод обработки изменения состояния голосовых чатов
@@ -28,22 +28,22 @@ class VoiceChannel
     {
         if($oldstate->guild != null) {
             $guild = $oldstate->guild;
-            $chanel = $discord->getChannel($oldstate->channel_id);
-            if(count($chanel->members) == 0 && $chanel->parent_id == self::ID_CATEGORY_VOICE_CHANNEL) {
-                $guild->channels->delete($chanel->id)->done(function (Channel $channel) {
+            $channel = $discord->getChannel($oldstate->channel_id);
+            if(count($channel->members) == 0 && $channel->parent_id == self::ID_CATEGORY_VOICE_CHANNEL) {
+                $guild->channels->delete($channel->id)->done(function (Channel $channel) {
                     LogService::setLog('Удален голосовой канал: ' . $channel->name);
                 });
             }
         }
 
         if($state->channel_id === self::ID_CHANEL_FOR_CREATE) {
-            $chanel = $discord->getChannel(self::ID_CATEGORY_VOICE_CHANNEL);
-            $guild = $chanel->guild;
+            $channel = $discord->getChannel(self::ID_CATEGORY_VOICE_CHANNEL);
+            $guild = $channel->guild;
 
-            $chanelName = 'Комната ' . $state->member->user->username . '`a';
+            $channelName = 'Комната ' . $state->member->user->username . '`a';
 
             $newChannel = $guild->channels->create([
-                'name' => $chanelName,
+                'name' => $channelName,
                 'type' => Channel::TYPE_VOICE,
                 'parent_id' => self::ID_CATEGORY_VOICE_CHANNEL,
                 'nsfw' => false,

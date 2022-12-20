@@ -15,7 +15,7 @@ class SingleDiscord
     {
         if (self::$singleDiscord == null) {
             self::$singleDiscord = new Discord([
-                'token' => $GLOBALS['params']['token-bot']
+                'token' => $GLOBALS['params']['token-bot'],
             ]);
         }
 
