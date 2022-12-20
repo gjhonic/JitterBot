@@ -37,24 +37,39 @@ class VoiceChannel
         }
 
         if($state->channel_id === self::ID_CHANEL_FOR_CREATE) {
-            $channel = $discord->getChannel(self::ID_CATEGORY_VOICE_CHANNEL);
-            $guild = $channel->guild;
+            $this->createPersonalVoiceChanel($discord, $state->member);
 
-            $channelName = 'Комната ' . $state->member->user->username . '`a';
-
-            $newChannel = $guild->channels->create([
-                'name' => $channelName,
-                'type' => Channel::TYPE_VOICE,
-                'parent_id' => self::ID_CATEGORY_VOICE_CHANNEL,
-                'nsfw' => false,
-            ]);
-
-            $user = $state->member->user;
-
-            $guild->channels->save($newChannel)->done(function(Channel $channel) use ($user) {
-                LogService::setLog('Пользователь: ' . $user->username . '. Создал голосовой канал: ' . $channel->name);
-                $channel->moveMember($user->id)->done(function () {});
-            });
         }
+    }
+
+    /**
+     * Создание личной комнаты
+     * @param Discord $discord
+     * @return void
+     * @throws \Exception
+     */
+    private function createPersonalVoiceChanel(Discord $discord, $member)
+    {
+        $channel = $discord->getChannel(self::ID_CATEGORY_VOICE_CHANNEL);
+        $guild = $channel->guild;
+
+        $channelName = 'Комната ' . $member->user->username . '`a';
+
+        $newChannel = $guild->channels->create([
+            'name' => $channelName,
+            'type' => Channel::TYPE_VOICE,
+            'parent_id' => self::ID_CATEGORY_VOICE_CHANNEL,
+            'nsfw' => false,
+        ]);
+
+        $user = $member->user;
+
+        $guild->channels->save($newChannel)->done(function(Channel $channel) use ($user, $member) {
+            LogService::setLog('Пользователь: ' . $user->username . '. Создал голосовой канал: ' . $channel->name);
+            $channel->moveMember($user->id)->done(function () {});
+            $channel->setPermissions($member, [
+                'mute_members', 'deafen_members', 'move_members', 'kick_members', 'manage_channels'
+            ]);
+        });
     }
 }

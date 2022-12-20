@@ -203,7 +203,7 @@ class TextChannel
         $channel = $discord->getChannel($idChannel);
         $channelBot = $discord->getChannel(self::ID_CHANEL_BOT);
         if($channel == null) {
-            $channelBot->sendMessage('Голосовой канал не найден');
+            $channelBot->sendMessage('Голосовой канал не найден 👻');
             return;
         }
 
@@ -249,7 +249,7 @@ class TextChannel
             });
         });
 
-        LogService::setLog('Пользователе: ' . $message->author->username . 'Запустил команду splite');
+        LogService::setLog('Пользователе: ' . $message->author->username . '. Запустил команду splite');
     }
 
     /**
