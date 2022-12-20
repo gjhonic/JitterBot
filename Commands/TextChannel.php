@@ -224,7 +224,7 @@ class TextChannel
         $emoji = $array[$num];
 
         $channelBot = $discord->getChannel(self::ID_CHANEL_BOT);
-        $channelBot->sendMessage('Понял, принял щас вся будет ' . $emoji);
+        $channelBot->sendMessage('Понял, принял щас всё будет ' . $emoji);
     }
 
     /**
