@@ -8,6 +8,7 @@ use Discord\Helpers\Collection;
 use Discord\Parts\Channel\Channel;
 use Discord\Parts\Channel\Message;
 use Discord\Parts\WebSockets\VoiceStateUpdate;
+use App\Models\User;
 
 /**
  * Команды для работы с текстовыми чатами
@@ -16,7 +17,9 @@ class TextChannel
 {
     //Id канала хорошие мемы
     public const ID_CHANEL_MEM = '1051775979334402098';
-    public const ID_CHANEL_BOT = '1054408436735021067';
+
+    //Id канала бот
+    public const ID_CHANEL_BOT = '1054734044321042432';//'1054408436735021067';
 
     //Id временного текстового канала
     private const ID_TIME_TEXT_CHANEL = '1054340896583335996';
@@ -183,6 +186,8 @@ class TextChannel
         if($message->author->bot != 1) {
             if($messageText == 'help') {
                 $this->helpCommand($message, $discord);
+            } else if(strpos($messageText, 'like') !== false) {
+                $this->likeCommand($message, $discord);
             } else if(strpos($messageText, 'splite') !== false) {
                 $this->spliteCommand($message, $discord);
             } else {
@@ -206,6 +211,24 @@ class TextChannel
         $channelBot->sendMessage($helpString);
 
         LogService::setLog('Пользователь: ' . $message->author->username . '. Запустил команду **help**');
+    }
+
+    /**
+     * Комада жертвует монеточкой
+     * @param Message $message
+     * @param Discord $discord
+     * @return void
+     */
+    private function likeCommand(Message $message, Discord $discord)
+    {
+        echo "111";
+        $discordAuthorId = $message->author->id;
+        $user = User::find($discordAuthorId);
+        echo ' - DUMP - ' . PHP_EOL;
+        echo "<pre>";
+        print_r($user);
+        echo "</pre>";
+        die;
     }
 
     /**
