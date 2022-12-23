@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Commands;
+namespace Commands;
 
-use App\Services\LogService;
+use Services\LogService;
 use Discord\Discord;
 use Discord\Helpers\Collection;
 use Discord\Parts\Channel\Channel;
 use Discord\Parts\Channel\Message;
 use Discord\Parts\WebSockets\VoiceStateUpdate;
-use App\Models\User;
+use Models\User;
 
 /**
  * Команды для работы с текстовыми чатами

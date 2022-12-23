@@ -2,8 +2,8 @@
 
 require_once __DIR__ . '/autoload.php';
 
-use App\Commands\TextChannel;
-use App\Commands\VoiceChannel;
+use Commands\TextChannel;
+use Commands\VoiceChannel;
 use Discord\Discord;
 use Discord\Parts\Channel\Message;
 use Discord\Parts\WebSockets\VoiceStateUpdate;

@@ -1,7 +1,6 @@
 <?php
 
-use App\Commands\Activity;
-use App\Commands\TextChannel;
+use Commands\Activity;
 
 require_once __DIR__ . '/../autoload.php';
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Commands;
+namespace Commands;
 
-use App\Services\LogService;
+use Services\LogService;
 use Discord\Discord;
 use Discord\Parts\Channel\Channel;
 use Discord\Parts\WebSockets\VoiceStateUpdate;
