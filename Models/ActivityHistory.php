@@ -215,4 +215,38 @@ class ActivityHistory extends BaseModel
         $stmt = $pdo->prepare($query);
         $result = $stmt->execute($params);
     }
+
+    /**
+     * Метод возвращает статус активности пользователя
+     *
+     * @param integer $discord_id
+     * @param string $typeActivity
+     * @return boolean
+     */
+    public static function getActivityByUser(
+        int $discord_id, 
+        string $typeActivity
+        ): bool
+    {
+        $pdo = self::getPDO();
+        if($pdo === null){
+            LogService::setLog('Ошибка подключения к базе данных');
+            return false;
+        }
+
+        $query = "SELECT `" . $typeActivity . "`" .
+            "FROM `activity_history` WHERE `discord_id` =:discord_id ORDER BY date DESC LIMIT 1";
+        $params = [
+            ':discord_id' => $discord_id,
+        ];
+        $stmt = $pdo->prepare($query);
+        $stmt->execute($params);
+        $result = $stmt->fetch();
+
+        if($result == []) {
+            return false;
+        } else {
+            return (bool)$result[$typeActivity];
+        }
+    } 
 }

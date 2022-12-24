@@ -152,4 +152,47 @@ class User extends BaseModel
         $stmt = $pdo->prepare($query);
         $stmt->execute($params);
     }
+
+    /**
+     * Метод передает монетку пользователю
+     *
+     * @param integer $userSenderId
+     * @param integer $userRecipientId
+     * @return boolean
+     */
+    public static function DonateMonet(int $userSenderId, int $userRecipientId): bool
+    {
+
+    }
+
+    public static function findByDiscordId(string $discordId): ?User
+    {
+        $pdo = self::getPDO();
+        if($pdo === null){
+            LogService::setLog('Ошибка подключения к базе данных');
+            return null;
+        }
+
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE `username` = :username AND `tag` = :tag");
+        $stmt->execute(['username' => $username, 'tag' => $tag]);
+        $result = $stmt->fetch();
+
+        if ($result == []) {
+            return null;
+        }
+
+        $dateTime = new DateTime();
+        $dateTime->setTimestamp((int)$result['created_at']);
+
+        $user = new Self();
+        $user->id = $result['id'];
+        $user->discord_id = $result['discord_id'];
+        $user->username = $result['username'];
+        $user->tag = $result['tag'];
+        $user->level = $result['level'];
+        $user->balance = $result['balance'];
+        $user->created_at = $dateTime->format('Y-m-d H:i:s');
+
+        return $user;
+    }
 }

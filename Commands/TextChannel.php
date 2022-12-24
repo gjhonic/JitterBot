@@ -25,6 +25,8 @@ class TextChannel
     //Id канала бот
     public const ID_CHANEL_BOT = '1054734044321042432'; //'1054408436735021067';
 
+    public const ID_CHANNEL_MUSIC = '1051846781132079186';
+
     //Id временного текстового канала
     public const ID_TIME_TEXT_CHANEL = '1054340896583335996';
     
@@ -48,9 +50,12 @@ class TextChannel
             $channel->messages->fetch($message->id)->done(function (Message $messageItem) use ($discord) {
                 $this->processChannelBot($messageItem, $discord);
             });
-        } else {
+        } else if($message->channel_id != self::ID_CHANNEL_MUSIC) {
             $date = new DateTime();
             ActivityHistory::setActive($discord, $message->author->id, $date, ModelActivity::MESSAGE_ACTIVE);
+        } else if($message->channel_id == self::ID_CHANNEL_MUSIC) {
+            $date = new DateTime();
+            ActivityHistory::setActive($discord, $message->author->id, $date, ModelActivity::MUSIC_ACTIVE);
         }
     }
 
@@ -238,14 +243,40 @@ class TextChannel
      */
     private function likeCommand(Message $message, Discord $discord)
     {
-        echo "111";
-        $discordAuthorId = $message->author->id;
-        $user = User::find($discordAuthorId);
-        echo ' - DUMP - ' . PHP_EOL;
-        echo "<pre>";
-        print_r($user);
-        echo "</pre>";
-        die;
+        $messageText = $message->content;
+        $userSender = $message->author->id;
+        $idUser = substr($messageText, 5);
+        $userData = explode('#', $idUser);
+
+        if($userData == [] || count($userData) != 2) {
+            BotEcho::printError($discord, 'Укажите пользователя в формате Ник#Тег');
+        }
+
+        $user = User::findByUsername($userData[0], $userData[1]);
+        if($user === null) {
+            BotEcho::printError($discord, 'Пользователь не найден');
+        }
+
+        $yourUser = User::findByDiscordId($userSender);
+        if($yourUser === null) {
+            BotEcho::printError($discord, 'Похоже вас еще не внесли в базу');
+        }
+
+        if($yourUser->balance > 0) {
+            BotEcho::printError($discord, 'У вас не достаточно монет');
+        }
+
+        $isLike = ActivityHistory::getActivityByUser($userSender, ModelActivity::LIKE_ACTIVE);
+        if($isLike) {
+            BotEcho::printError($discord, 'Вы уже донатили');
+        }
+
+        $userRecipient = $user->discord_id;
+        $result = User::DonateMonet($userSender, $userRecipient);
+        
+
+        print_r($userData);
+
     }
 
     /**
