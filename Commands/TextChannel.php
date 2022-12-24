@@ -8,7 +8,9 @@ use Discord\Helpers\Collection;
 use Discord\Parts\Channel\Channel;
 use Discord\Parts\Channel\Message;
 use Discord\Parts\WebSockets\VoiceStateUpdate;
+use App\Services\LogCronService;
 use App\Models\User;
+use DateTime;
 
 /**
  * Команды для работы с текстовыми чатами
@@ -81,13 +83,13 @@ class TextChannel
      * @param Discord $discord
      * @return void
      */
-    public function clearTimeTextChat(Discord $discord)
+    public function clearTimeTextChat(Discord $discord, LogCronService $logCron)
     {
         try {
             $channel = $discord->getChannel(self::ID_TIME_TEXT_CHANEL);
 
             $channel->getMessageHistory([
-            ])->done(function (Collection $messages) use ($discord, $channel) {
+            ])->done(function (Collection $messages) use ($discord, $channel, $logCron) {
 
                 $messageArray = [];
                 $messagesIds = [];
@@ -106,10 +108,13 @@ class TextChannel
                 $messageArray = array_reverse($messageArray);
 
                 if($messageArray === []) {
-                    $discord->close();
+                    $logCron->message = 'Временный чат пуст';
+                    $dateEnd = new DateTime();
+                    $logCron->dateFinish = $dateEnd->format('Y-m-d H:i:s');
+                    $logCron->writeLog();
                 }
 
-                $channel->deleteMessages($messagesIds)->done(function () use ($discord, $messageArray) {
+                $channel->deleteMessages($messagesIds)->done(function () use ($discord, $messageArray, $logCron) {
                     $messagesStr = 'Бот отчистил временный чат' . PHP_EOL . 'Сообщений: ' . count($messageArray) . ' ```md' . PHP_EOL;
                     foreach ($messageArray as $item) {
                         $messagesStr .= '[AuthorId:' . $item['author_id'] . '] ' .
@@ -117,7 +122,12 @@ class TextChannel
                     }
                     $messagesStr .= '```';
 
-                    LogService::setLog($messagesStr, true);
+                    LogService::setLog($messagesStr);
+                    
+                    $logCron->message = 'Крон отчистил временный чат';
+                    $dateEnd = new DateTime();
+                    $logCron->dateFinish = $dateEnd->format('Y-m-d H:i:s');
+                    $logCron->writeLog();
                 });
             });
 
