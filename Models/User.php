@@ -1,9 +1,9 @@
 <?php
 
-namespace Models;
+namespace App\Models;
 
 use DateTime;
-use Services\LogService;
+use App\Services\LogService;
 
 class User extends BaseModel
 {
@@ -113,6 +113,8 @@ class User extends BaseModel
             LogService::setLog('Ошибка подключения к базе данных');
             return false;
         }
+
+        $this->balance = $balance;
 
         $query = "UPDATE `users` SET `balance` = :balance WHERE `id` = :id";
         $params = [

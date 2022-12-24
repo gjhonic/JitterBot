@@ -1,8 +1,8 @@
 <?php
 
-use Commands\TextChannel;
-
 require_once __DIR__ . '/../autoload.php';
+
+use App\Commands\TextChannel;
 
 $discord = SingleDiscord::getInstance();
 

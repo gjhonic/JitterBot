@@ -1,8 +1,10 @@
 <?php
 
-namespace Models;
+namespace App\Models;
 
-use Services\LogService;
+use App\Services\LogService;
+
+use App\Models\BaseModel;
 use DateTime;
 
 class ActivityHistory extends BaseModel
@@ -21,10 +23,10 @@ class ActivityHistory extends BaseModel
     /**
      * Метод возвращет все активности на дату
      *
-     * @param string $date
+     * @param DateTime $date
      * @return array
      */
-    public static function getActivitiesByDate(string $date): array
+    public static function getActivitiesByDate(DateTime $date): array
     {
         $pdo = self::getPDO();
         if($pdo === null){
@@ -33,7 +35,7 @@ class ActivityHistory extends BaseModel
         }
 
         $stmt = $pdo->prepare("SELECT * FROM activity_history WHERE `date`=:date");
-        $stmt->execute(['date' => $date]);
+        $stmt->execute(['date' => $date->format('Y-m-d')]);
         $result = $stmt->fetchAll();
 
         if ($result == []) {
@@ -77,5 +79,25 @@ class ActivityHistory extends BaseModel
         $sum += (int)$this->music_active;
         $sum += (int)$this->always_active;
         return $sum;
+    }
+
+    /**
+     * Метод проверят закрыл ли пользователь ежедневки
+     *
+     * @return boolean
+     */
+    public function isCompleteDaily(Daily $daily): bool
+    {
+        $count = 0;
+
+        $active1 = $daily->active1; 
+        $active2 = $daily->active2; 
+        $active3 = $daily->active3;
+        
+        $count += (int)$this->$active1;
+        $count += (int)$this->$active2;
+        $count += (int)$this->$active3;
+
+        return ($count === 3);
     }
 }

@@ -1,8 +1,8 @@
 <?php
 
-namespace Models;
+namespace App\Models;
 
-use Models\BaseModel;
+use App\Models\BaseModel;
 
 class Level extends BaseModel
 {

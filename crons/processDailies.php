@@ -1,8 +1,8 @@
 <?php
 
-use Commands\Activity;
-
 require_once __DIR__ . '/../autoload.php';
+
+use App\Commands\Activity;
 
 $discord = SingleDiscord::getInstance();
 

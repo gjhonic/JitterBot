@@ -4,6 +4,7 @@ $GLOBALS['params'] = (require __DIR__ . '/config.php');
 
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/SingleDiscord.php';
+require_once __DIR__ . '/Models/BaseModel.php';
 
 foreach (glob(__DIR__ . '/Models/*.php') as $filename) {
     require_once $filename;

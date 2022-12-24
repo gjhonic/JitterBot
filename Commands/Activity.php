@@ -1,10 +1,11 @@
 <?php
 
-namespace Commands;
+namespace App\Commands;
 
 use Discord\Discord;
-use Models\User;
-use Models\ActivityHistory;
+use App\Models\User;
+use App\Models\ActivityHistory;
+use App\Models\Daily;
 use DateTime;
 
 /**
@@ -16,14 +17,19 @@ class Activity
     {
         $dateNow = new DateTime();
         $dateYesterday = new DateTime();
-        $dateYesterday->modify('-1 day');
+        //$dateYesterday->modify('-1 day');
 
         $users = User::getAll();
-        $activities = ActivityHistory::getActivitiesByDate($dateYesterday->format('Y-m-d'));
-        
+        $activities = ActivityHistory::getActivitiesByDate($dateYesterday);
+        $activeDaily = Daily::getDailyByDate($dateYesterday);
+
+        // echo '<pre>';
+        // print_r($active);
+        // echo '</pre>';
+        // die;
         
         foreach ($users AS $user) {
-            $user->initActivity($dateNow->format('Y-m-d'));
+            //$user->initActivity($dateNow->format('Y-m-d'));
 
             if(!isset($activities[$user->discord_id])){
                 continue;
@@ -32,12 +38,23 @@ class Activity
             $userActivity = $activities[$user->discord_id];
             $balanceUser = $user->balance;
             $balanceUser += $userActivity->getSumCount();
+            
+            if($userActivity->isCompleteDaily($activeDaily)){
+                $balanceUser += 3;
+            }
 
             $user->setBalance($balanceUser);
-            $user->initActivity($dateNow->format('Y-m-d'));
         }
 
-        echo ' - DUMP - ' . PHP_EOL;
+        echo ' - userActivity - ' . PHP_EOL;
+        echo "<pre>";
+        print_r($userActivity);
+        echo "</pre>";
+        echo ' - activeDaily - ' . PHP_EOL;
+        echo "<pre>";
+        print_r($activeDaily);
+        echo "</pre>";
+        echo ' - users - ' . PHP_EOL;
         echo "<pre>";
         print_r($users);
         echo "</pre>";
