@@ -45,8 +45,46 @@ class Daily extends BaseModel
         return $daily;
     }
 
+    /**
+     * Метод генерирует новые ежедневные задания на новую дату
+     *
+     * @param DateTime $date
+     * @return Daily|null
+     */
     public static function genenerateNewTask(DateTime $date): ?Daily
     {
+        $activities = ActivityHistory::getListActivities();
+        shuffle($activities);
         
+        $choseActivities = array_slice($activities, 0, 3);
+
+        $pdo = self::getPDO();
+        if($pdo === null){
+            LogService::setLog('Ошибка подключения к базе данных');
+            return null;
+        }
+
+        $daily = new Self();
+        $daily->date = $date->format('Y-m-d');
+        $daily->active1 = $choseActivities[0];
+        $daily->active2 = $choseActivities[1];
+        $daily->active3 = $choseActivities[2];
+
+        $name = 'Новая категория';
+        $query = "INSERT INTO `dailies` (`date`, `active1`, `active2`, `active3`)
+         VALUES (:date, :active1, :active2, :active3)";
+        $params = [
+            ':date' => $daily->date,
+            ':active1' => $daily->active1,
+            ':active2' => $daily->active2,
+            ':active3' => $daily->active3,
+        ];
+        $stmt = $pdo->prepare($query);
+        $result = $stmt->execute($params);
+        if ($result) {
+            return $daily;
+        } else {
+            return null;
+        }
     }
 }

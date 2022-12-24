@@ -21,6 +21,19 @@ class ActivityHistory extends BaseModel
     public $always_active;
 
     /**
+     * Метод возращает массив активностей
+     *
+     * @return array
+     */
+    public static function getListActivities(): array
+    {
+        return [
+            'voice_active', 'message_active', 'like_active', 'mem_active', 'reaction_active',
+            'music_active', 'always_active'
+        ];
+    }
+
+    /**
      * Метод возвращет все активности на дату
      *
      * @param DateTime $date

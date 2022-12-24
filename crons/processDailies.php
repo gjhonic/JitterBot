@@ -13,7 +13,7 @@ $logCron = new LogCronService();
 $logCron->cronName = 'Подсчет активности';
 $logCron->dateStart = $dateTime->format('Y-m-d H:i:s');
 
-$discord->on('ready', function () use ($discord) {
+$discord->on('ready', function () use ($discord, $logCron) {
     $activityCommand = new Activity();
     $activityCommand->process($discord, $logCron);
 });

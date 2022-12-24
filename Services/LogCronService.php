@@ -34,4 +34,15 @@ class LogCronService
             $discord->close();
         });
     }
+
+    /**
+     * Метод пишет ошибку
+     *
+     * @param string $message
+     * @return void
+     */
+    public function addErrorMessage(string $message)
+    {
+        $this->errorMessage .= $message . PHP_EOL;
+    }
 }

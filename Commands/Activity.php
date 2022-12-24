@@ -20,34 +20,50 @@ class Activity
         $dateYesterday = new DateTime();
         $dateYesterday->modify('-1 day');
 
-        $users = User::getAll();
-        $activities = ActivityHistory::getActivitiesByDate($dateYesterday);
-        $activeDaily = Daily::getDailyByDate($dateYesterday);
+        // $users = User::getAll();
+        // $activities = ActivityHistory::getActivitiesByDate($dateYesterday);
+        // $activeDaily = Daily::getDailyByDate($dateYesterday);
         
-        foreach ($users AS $user) {
-            $user->initActivity($dateNow->format('Y-m-d'));
+        // foreach ($users AS $user) {
+        //     $user->initActivity($dateNow->format('Y-m-d'));
 
-            if(!isset($activities[$user->discord_id])){
-                continue;
-            }
+        //     if(!isset($activities[$user->discord_id])){
+        //         continue;
+        //     }
 
-            $userActivity = $activities[$user->discord_id];
-            $balanceUser = $user->balance;
-            $balanceUser += $userActivity->getSumCount();
+        //     $userActivity = $activities[$user->discord_id];
+        //     $balanceUser = $user->balance;
+        //     $balanceUser += $userActivity->getSumCount();
             
-            if($userActivity->isCompleteDaily($activeDaily)){
-                $balanceUser += 3;
-            }
+        //     if($userActivity->isCompleteDaily($activeDaily)){
+        //         $balanceUser += 3;
+        //     }
 
-            $user->setBalance($balanceUser);
-        }
+        //     $user->setBalance($balanceUser);
+        // }
 
         $newDaily = Daily::genenerateNewTask($dateNow);
+        if($newDaily){
+            $this->publicateNewDaily($newDaily)
+        } else {
+            $logCron->addErrorMessage('Произошла ошибка генерации новых ежедневных заданий');
+        }
 
-        $logCron->message = 'Крон посчитал активность участников за' .
+        $logCron->message = 'Крон подсчитал активность участников за' .
         'прошедшие сутки, начислил баллы и сгенерировл новые ежедневные задания';
         $dateEnd = new DateTime();
         $logCron->dateFinish = $dateEnd->format('Y-m-d H:i:s');
         $logCron->writeLog();
+    }
+
+    /**
+     * Метод пишет в канал новости публикацию о новых ежедневных заданиях
+     *
+     * @param Daily $daily
+     * @return void
+     */
+    private function publicateNewDaily(Daily $daily)
+    {
+
     }
 }
