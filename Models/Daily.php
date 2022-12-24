@@ -46,6 +46,36 @@ class Daily extends BaseModel
     }
 
     /**
+     * Метод возвращает крайнии ежедневные задания
+     *
+     * @return Daily|null
+     */
+    public static function getLastDaily(): ?Daily
+    {
+        $pdo = self::getPDO();
+        if($pdo === null){
+            LogService::setLog('Ошибка подключения к базе данных');
+            return [];
+        }
+
+        $stmt = $pdo->prepare("SELECT * FROM dailies ORDER BY date DESC");
+        $stmt->execute();
+        $result = $stmt->fetch();
+
+        if($result === []) {
+            return null;
+        }
+
+        $daily = new Self();
+        $daily->id = $result['id'];
+        $daily->date = $result['date'];
+        $daily->active1 = $result['active1'];
+        $daily->active2 = $result['active2'];
+        $daily->active3 = $result['active3'];
+        return $daily;
+    }
+
+    /**
      * Метод генерирует новые ежедневные задания на новую дату
      *
      * @param DateTime $date
@@ -70,7 +100,6 @@ class Daily extends BaseModel
         $daily->active2 = $choseActivities[1];
         $daily->active3 = $choseActivities[2];
 
-        $name = 'Новая категория';
         $query = "INSERT INTO `dailies` (`date`, `active1`, `active2`, `active3`)
          VALUES (:date, :active1, :active2, :active3)";
         $params = [

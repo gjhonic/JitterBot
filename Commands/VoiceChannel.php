@@ -30,6 +30,10 @@ class VoiceChannel
      */
     public function process(VoiceStateUpdate $state, Discord $discord, $oldstate)
     {
+        if($state->member->user->bot){
+            return;
+        }
+        
         if($oldstate != null) {
             $guild = $oldstate->guild;
             $channel = $discord->getChannel($oldstate->channel_id);
@@ -46,7 +50,7 @@ class VoiceChannel
 
         if($state->member->user) {
             $date = new DateTime();
-            ActivityHistory::setActive($discord, $state->member->user->id, $date, ModelActivity::VOICE_ACTIVE);
+            ActivityHistory::setActive($state->member->user->id, $date, ModelActivity::VOICE_ACTIVE);
         }
     }
 

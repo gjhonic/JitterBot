@@ -13,6 +13,7 @@ use App\Models\User;
 use DateTime;
 use App\Models\ActivityHistory;
 use App\Models\Activity as ModelActivity;
+use App\Models\Daily;
 
 /**
  * Команды для работы с текстовыми чатами
@@ -44,6 +45,10 @@ class TextChannel
     public function process(Message $message, Discord $discord)
     {
         $date = new DateTime();
+
+        if($message->author->bot){
+            return;
+        }
         
         if($message->channel_id == self::ID_CHANEL_MEM) {
             //Если сообщений из канала хорошие мемы
@@ -55,10 +60,10 @@ class TextChannel
             $channel->messages->fetch($message->id)->done(function (Message $messageItem) use ($discord) {
                 $this->processChannelBot($messageItem, $discord);
             });
-        } else if($message->channel_id != self::ID_CHANNEL_MUSIC) {
+        } else if($message->channel_id != self::ID_CHANNEL_MUSIC && !$message->author->bot) {
             //Если из текстового чата
             ActivityHistory::setActive($message->author->id, $date, ModelActivity::MESSAGE_ACTIVE);
-        } else if($message->channel_id == self::ID_CHANNEL_MUSIC) {
+        } else if($message->channel_id == self::ID_CHANNEL_MUSIC && !$message->author->bot) {
             //Если из музыкального канала
             ActivityHistory::setActive($message->author->id, $date, ModelActivity::MUSIC_ACTIVE);
         }
@@ -233,13 +238,13 @@ class TextChannel
      */
     private function helpCommand(Message $message, Discord $discord)
     {
-        $helpString = ">>> **Список команд бота**" . PHP_EOL .
-            "1. splite [Id_Комнаты] - Команда разделяет участников на 2 команды";
+        $helpString = "**Список команд бота**" . PHP_EOL . PHP_EOL .
+            "1. **splite [Id_Комнаты]** - Команда разделяет участников на 2 команды" . PHP_EOL;
+        
+        $helpString .= "2. **like [ИмяПользователя]#[Тег]** - Команда жертвует монеточкой другому пользователю" . PHP_EOL;
+        $helpString .= "3. **check_active** - Команда показывает статус активностей" . PHP_EOL;
 
-        $channelBot = $discord->getChannel(self::ID_CHANEL_BOT);
-        $channelBot->sendMessage($helpString);
-
-        LogService::setLog('Пользователь: ' . $message->author->username . '. Запустил команду **help**');
+        BotEcho::printSuccess($discord, $helpString);
     }
 
     /**
@@ -296,9 +301,56 @@ class TextChannel
         }
     }
 
+    /**
+     * Метод показывает состояния активностей
+     *
+     * @param Message $message
+     * @param Discord $discord
+     * @return void
+     */
     private function checkActiveCommand(Message $message, Discord $discord)
     {
+        $userId = $message->author->id;
 
+        $activities = ActivityHistory::getActivitiesByUser($userId);
+        $dailyActivities = Daily::getLastDaily();
+
+        if($activities === null) {
+            BotEcho::printError($discord, 'Произошла ошибка получения статусов активности');
+            return;
+        }
+
+        $isCompleteDaily = false;
+        $countMonet = 1;
+        $countMonet += (int)$activities->voice_active;
+        $countMonet += (int)$activities->message_active;
+        $countMonet += (int)$activities->like_active;
+        $countMonet += (int)$activities->mem_active;
+        $countMonet += (int)$activities->reaction_active;
+        $countMonet += (int)$activities->music_active;
+        $ac1 = $dailyActivities->active1;
+        $ac2 = $dailyActivities->active2;
+        $ac3 = $dailyActivities->active3;
+
+        if($activities->$ac1 && $activities->$ac2 && $activities->$ac3) {
+            $isCompleteDaily = true;
+            $countMonet += 3;
+        }
+
+        $message = 'Статус ваших Активностей на **' . $activities->date . '**' . PHP_EOL . PHP_EOL;
+        $message .= 'Голосовая активность: ' . ($activities->voice_active ? '✅' : '❌') . PHP_EOL;
+        $message .= 'Активность в чатах: ' . ($activities->message_active ? '✅' : '❌') . PHP_EOL;
+        $message .= 'Активность пожертвованиях: ' . ($activities->like_active ? '✅' : '❌') . PHP_EOL;
+        $message .= 'Активность в хороших мемах: ' . ($activities->mem_active ? '✅' : '❌') . PHP_EOL;
+        $message .= 'Активность в реакциях: ' . ($activities->reaction_active ? '✅' : '❌') . PHP_EOL;
+        $message .= 'Музыкальная активность: ' . ($activities->music_active ? '✅' : '❌') . PHP_EOL;
+        $message .= PHP_EOL;
+        $message .= 'Ежедневка: ' . ($isCompleteDaily ? '✅' : '❌') . PHP_EOL;
+
+        $message .= PHP_EOL;
+        $message .= 'Вы заработаете: ' . $countMonet . " 🪙";
+
+        BotEcho::printSuccess($discord, $message);
     }
 
     /**
@@ -372,13 +424,7 @@ class TextChannel
      */
     private function notFoundCommand(Discord $discord)
     {
-        $array = [
-            '🖕','🥴','👻','🧠🤏','🤢','👾','💀'
-        ];
-        $num = rand(0,6);
-        $emoji = $array[$num];
-        $channel = $discord->getChannel(self::ID_CHANEL_BOT);
-        $channel->sendMessage('Команда не найдена ' . $emoji);
+        BotEcho::printError($discord, 'Команда не найдена');
     }
 
     /**
