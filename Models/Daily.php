@@ -44,4 +44,9 @@ class Daily extends BaseModel
         $daily->active3 = $result['active3'];
         return $daily;
     }
+
+    public static function genenerateNewTask(DateTime $date): ?Daily
+    {
+        
+    }
 }

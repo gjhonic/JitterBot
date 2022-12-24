@@ -6,6 +6,7 @@ use Discord\Discord;
 use App\Models\User;
 use App\Models\ActivityHistory;
 use App\Models\Daily;
+use App\Services\LogCronService;
 use DateTime;
 
 /**
@@ -13,23 +14,18 @@ use DateTime;
  */
 class Activity
 {
-    public function process(Discord $discord)
+    public function process(Discord $discord, LogCronService $logCron)
     {
         $dateNow = new DateTime();
         $dateYesterday = new DateTime();
-        //$dateYesterday->modify('-1 day');
+        $dateYesterday->modify('-1 day');
 
         $users = User::getAll();
         $activities = ActivityHistory::getActivitiesByDate($dateYesterday);
         $activeDaily = Daily::getDailyByDate($dateYesterday);
-
-        // echo '<pre>';
-        // print_r($active);
-        // echo '</pre>';
-        // die;
         
         foreach ($users AS $user) {
-            //$user->initActivity($dateNow->format('Y-m-d'));
+            $user->initActivity($dateNow->format('Y-m-d'));
 
             if(!isset($activities[$user->discord_id])){
                 continue;
@@ -46,18 +42,12 @@ class Activity
             $user->setBalance($balanceUser);
         }
 
-        echo ' - userActivity - ' . PHP_EOL;
-        echo "<pre>";
-        print_r($userActivity);
-        echo "</pre>";
-        echo ' - activeDaily - ' . PHP_EOL;
-        echo "<pre>";
-        print_r($activeDaily);
-        echo "</pre>";
-        echo ' - users - ' . PHP_EOL;
-        echo "<pre>";
-        print_r($users);
-        echo "</pre>";
-        die;
+        $newDaily = Daily::genenerateNewTask($dateNow);
+
+        $logCron->message = 'Крон посчитал активность участников за' .
+        'прошедшие сутки, начислил баллы и сгенерировл новые ежедневные задания';
+        $dateEnd = new DateTime();
+        $logCron->dateFinish = $dateEnd->format('Y-m-d H:i:s');
+        $logCron->writeLog();
     }
 }

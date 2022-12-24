@@ -19,7 +19,7 @@ class TextChannel
     public const ID_CHANEL_MEM = '1051775979334402098';
 
     //Id канала бот
-    public const ID_CHANEL_BOT = '1054734044321042432';//'1054408436735021067';
+    public const ID_CHANEL_BOT = '1054734044321042432'; //'1054408436735021067';
 
     //Id временного текстового канала
     private const ID_TIME_TEXT_CHANEL = '1054340896583335996';
@@ -165,7 +165,7 @@ class TextChannel
                     }
                     $messagesStr .= '```';
 
-                    LogService::setLog($messagesStr, true);
+                    LogService::setLog($messagesStr);
                 });
             });
 
