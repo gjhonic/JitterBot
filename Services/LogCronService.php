@@ -21,7 +21,7 @@ class LogCronService
         $discord = \SingleDiscord::getInstance();
         $channel = $discord->getChannel(self::getIdTextChannelCronLog());
 
-        $message = "Крон: **" . $this->cronName . "** ". PHP_EOL .">>>";
+        $message = "Крон: **" . $this->cronName . "** ". PHP_EOL .">>> ";
         $message .= "Время Запуска: *" . $this->dateStart . "*" . PHP_EOL;
         $message .= "Время Остановки: *" . $this->dateStart . "*" . PHP_EOL;
         $message .= $this->message . PHP_EOL;

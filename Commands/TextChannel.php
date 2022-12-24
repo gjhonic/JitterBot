@@ -22,7 +22,9 @@ class TextChannel
     public const ID_CHANEL_BOT = '1054734044321042432'; //'1054408436735021067';
 
     //Id временного текстового канала
-    private const ID_TIME_TEXT_CHANEL = '1054340896583335996';
+    public const ID_TIME_TEXT_CHANEL = '1054340896583335996';
+    
+    public const ID_NEWS_CHANNEL = '1054734044321042432'; //'1051479087593574470';
 
     /**
      * Метод обработки изменения состояния текстовых чатов

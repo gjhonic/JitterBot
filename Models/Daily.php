@@ -87,4 +87,25 @@ class Daily extends BaseModel
             return null;
         }
     }
+
+    /**
+     * Метод возвращает заголовок задания
+     *
+     * @param integer $numActive
+     * @return string
+     */
+    public function getTitleActive(int $numActive): string
+    {
+        $titles = [];
+        if($numActive == 1) {
+            $titles = ActivityHistory::getTitlesByActivity($this->active1);
+        } else if($numActive == 2) {
+            $titles = ActivityHistory::getTitlesByActivity($this->active2);
+        } else {
+            $titles = ActivityHistory::getTitlesByActivity($this->active3);
+        }
+
+        shuffle($titles);
+        return $titles[0];
+    }
 }

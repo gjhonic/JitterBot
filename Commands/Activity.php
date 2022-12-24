@@ -44,7 +44,7 @@ class Activity
 
         $newDaily = Daily::genenerateNewTask($dateNow);
         if($newDaily){
-            $this->publicateNewDaily($newDaily)
+            $this->publicateNewDaily($discord, $newDaily);
         } else {
             $logCron->addErrorMessage('Произошла ошибка генерации новых ежедневных заданий');
         }
@@ -62,8 +62,32 @@ class Activity
      * @param Daily $daily
      * @return void
      */
-    private function publicateNewDaily(Daily $daily)
+    private function publicateNewDaily(Discord $discord, Daily $daily)
     {
-
+        $channel = $discord->getChannel(TextChannel::ID_NEWS_CHANNEL);
+        $embed = [
+            'title' => 'Новые ежедневные задания!',
+            'color' => 54783,
+            'description' => 'Привет ребят, сегодня **' . $daily->date .
+                '**, а это значит стартуют новый ежедневные задания успей закрыть их!))) ' . PHP_EOL,
+            'footer' => [
+                'text' => 'jitterBot'
+            ],
+            'fields' => [
+                [
+                    'name' => 'Задание №1',
+                    'value' => $daily->getTitleActive(1),
+                ],
+                [
+                    'name' => 'Задание №2',
+                    'value' => $daily->getTitleActive(2),
+                ],
+                [
+                    'name' => 'Задание №3',
+                    'value' => $daily->getTitleActive(3),
+                ],
+            ],
+        ];
+        $channel->sendMessage('', false, $embed);
     }
 }
