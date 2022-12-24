@@ -2,10 +2,14 @@
 
 namespace App\Commands;
 
+use App\Models\ActivityHistory;
 use App\Services\LogService;
+use DateTime;
 use Discord\Discord;
 use Discord\Parts\Channel\Channel;
+use Discord\Parts\Guild\AutoModeration\Action;
 use Discord\Parts\WebSockets\VoiceStateUpdate;
+use App\Models\Activity as ModelActivity;
 
 /**
  * Команды для работы с голосовыми чатами
@@ -26,7 +30,7 @@ class VoiceChannel
      */
     public function process(VoiceStateUpdate $state, Discord $discord, $oldstate)
     {
-        if($oldstate->guild != null) {
+        if($oldstate != null) {
             $guild = $oldstate->guild;
             $channel = $discord->getChannel($oldstate->channel_id);
             if(count($channel->members) == 0 && $channel->parent_id == self::ID_CATEGORY_VOICE_CHANNEL) {
@@ -38,7 +42,11 @@ class VoiceChannel
 
         if($state->channel_id === self::ID_CHANEL_FOR_CREATE) {
             $this->createPersonalVoiceChanel($discord, $state->member);
+        }
 
+        if($state->member->user) {
+            $date = new DateTime();
+            ActivityHistory::setActive($discord, $state->member->user->id, $date, ModelActivity::VOICE_ACTIVE);
         }
     }
 

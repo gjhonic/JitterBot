@@ -11,6 +11,8 @@ use Discord\Parts\WebSockets\VoiceStateUpdate;
 use App\Services\LogCronService;
 use App\Models\User;
 use DateTime;
+use App\Models\ActivityHistory;
+use App\Models\Activity as ModelActivity;
 
 /**
  * Команды для работы с текстовыми чатами
@@ -46,6 +48,9 @@ class TextChannel
             $channel->messages->fetch($message->id)->done(function (Message $messageItem) use ($discord) {
                 $this->processChannelBot($messageItem, $discord);
             });
+        } else {
+            $date = new DateTime();
+            ActivityHistory::setActive($discord, $message->author->id, $date, ModelActivity::MESSAGE_ACTIVE);
         }
     }
 

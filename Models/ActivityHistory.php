@@ -6,6 +6,7 @@ use App\Services\LogService;
 
 use App\Models\BaseModel;
 use DateTime;
+use Discord\Discord;
 
 class ActivityHistory extends BaseModel
 {
@@ -176,5 +177,42 @@ class ActivityHistory extends BaseModel
         $count += (int)$this->$active3;
 
         return ($count === 3);
+    }
+
+    /**
+     * Метод устанавливает активность пользователя
+     *
+     * @param Discord $discord
+     * @param string $discord_id
+     * @param DateTime $date
+     * @param string $typeActivity
+     * @return void
+     */
+    public static function setActive(
+        Discord $discord, 
+        string $discord_id, 
+        DateTime $date, 
+        string $typeActivity
+    )
+    {
+        $pdo = self::getPDO();
+        if($pdo === null){
+            LogService::setLog('Ошибка подключения к базе данных');
+            return [];
+        }
+
+        $hour = (int)$date->format('H');
+        if($hour < 5) {
+            $date->modify('-1 day');
+        }
+
+        $query = "UPDATE `activity_history` SET `" . $typeActivity . "`=1 
+        WHERE `discord_id`=:discord_id AND `date`=:date";
+        $params = [
+            ':discord_id' => $discord_id,
+            ':date' => $date->format('Y-m-d')
+        ];
+        $stmt = $pdo->prepare($query);
+        $result = $stmt->execute($params);
     }
 }
