@@ -44,18 +44,22 @@ class TextChannel
     public function process(Message $message, Discord $discord)
     {
         $date = new DateTime();
-
+        
         if($message->channel_id == self::ID_CHANEL_MEM) {
+            //Если сообщений из канала хорошие мемы
             $this->setReactionsToMem($message);
             ActivityHistory::setActive($message->author->id, $date, ModelActivity::MEM_ACTIVE);
         } else if($message->channel_id == self::ID_CHANEL_BOT) {
+            //Если из канала для управления ботом
             $channel = $discord->getChannel($message->channel_id);
             $channel->messages->fetch($message->id)->done(function (Message $messageItem) use ($discord) {
                 $this->processChannelBot($messageItem, $discord);
             });
         } else if($message->channel_id != self::ID_CHANNEL_MUSIC) {
+            //Если из текстового чата
             ActivityHistory::setActive($message->author->id, $date, ModelActivity::MESSAGE_ACTIVE);
         } else if($message->channel_id == self::ID_CHANNEL_MUSIC) {
+            //Если из музыкального канала
             ActivityHistory::setActive($message->author->id, $date, ModelActivity::MUSIC_ACTIVE);
         }
     }
@@ -213,7 +217,9 @@ class TextChannel
                 $this->likeCommand($message, $discord);
             } else if(strpos($messageText, 'splite') !== false) {
                 $this->spliteCommand($message, $discord);
-            } else {
+            } else if($messageText == 'check_active') {
+                $this->checkActiveCommand($message, $discord);
+            }else {
                 $this->notFoundCommand($discord);
             }
         }
@@ -288,6 +294,11 @@ class TextChannel
         } else {
             BotEcho::printError($discord, 'Произошла ошибка выполнения команды **like**');
         }
+    }
+
+    private function checkActiveCommand(Message $message, Discord $discord)
+    {
+
     }
 
     /**
