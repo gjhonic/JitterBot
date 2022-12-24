@@ -162,9 +162,38 @@ class User extends BaseModel
      */
     public static function DonateMonet(int $userSenderId, int $userRecipientId): bool
     {
+        $pdo = self::getPDO();
+        if($pdo === null){
+            LogService::setLog('Ошибка подключения к базе данных');
+            return false;
+        }
 
+        $query = "UPDATE `users` SET `balance`=`balance` - 1 
+        WHERE `discord_id`=:discord_id";
+        $params = [
+            ':discord_id' => $userSenderId,
+        ];
+        $stmt = $pdo->prepare($query);
+        $result = $stmt->execute($params);
+        if($result) {
+            $query = "UPDATE `users` SET `balance`=`balance` + 1 
+            WHERE `discord_id`=:discord_id";
+            $params = [
+                ':discord_id' => $userRecipientId,
+            ];
+            $stmt = $pdo->prepare($query);
+            $result = $stmt->execute($params);
+            return $result;
+        }
+        return false;
     }
 
+    /**
+     * Метод находит пользователя по discord_id
+     *
+     * @param string $discordId
+     * @return User|null
+     */
     public static function findByDiscordId(string $discordId): ?User
     {
         $pdo = self::getPDO();
@@ -173,8 +202,8 @@ class User extends BaseModel
             return null;
         }
 
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE `username` = :username AND `tag` = :tag");
-        $stmt->execute(['username' => $username, 'tag' => $tag]);
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE `discord_id` = :discord_id");
+        $stmt->execute(['discord_id' => $discordId]);
         $result = $stmt->fetch();
 
         if ($result == []) {

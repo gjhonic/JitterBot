@@ -22,9 +22,10 @@ class TextChannel
     //Id канала хорошие мемы
     public const ID_CHANEL_MEM = '1051775979334402098';
 
-    //Id канала бот
+    //Id канала для управления ботом
     public const ID_CHANEL_BOT = '1054734044321042432'; //'1054408436735021067';
 
+    //Id канала для управления музыкальным ботом
     public const ID_CHANNEL_MUSIC = '1051846781132079186';
 
     //Id временного текстового канала
@@ -42,20 +43,20 @@ class TextChannel
      */
     public function process(Message $message, Discord $discord)
     {
+        $date = new DateTime();
+
         if($message->channel_id == self::ID_CHANEL_MEM) {
             $this->setReactionsToMem($message);
-
+            ActivityHistory::setActive($message->author->id, $date, ModelActivity::MEM_ACTIVE);
         } else if($message->channel_id == self::ID_CHANEL_BOT) {
             $channel = $discord->getChannel($message->channel_id);
             $channel->messages->fetch($message->id)->done(function (Message $messageItem) use ($discord) {
                 $this->processChannelBot($messageItem, $discord);
             });
         } else if($message->channel_id != self::ID_CHANNEL_MUSIC) {
-            $date = new DateTime();
-            ActivityHistory::setActive($discord, $message->author->id, $date, ModelActivity::MESSAGE_ACTIVE);
+            ActivityHistory::setActive($message->author->id, $date, ModelActivity::MESSAGE_ACTIVE);
         } else if($message->channel_id == self::ID_CHANNEL_MUSIC) {
-            $date = new DateTime();
-            ActivityHistory::setActive($discord, $message->author->id, $date, ModelActivity::MUSIC_ACTIVE);
+            ActivityHistory::setActive($message->author->id, $date, ModelActivity::MUSIC_ACTIVE);
         }
     }
 
@@ -244,39 +245,49 @@ class TextChannel
     private function likeCommand(Message $message, Discord $discord)
     {
         $messageText = $message->content;
+        $userSenderUsername = $message->author->username;
         $userSender = $message->author->id;
         $idUser = substr($messageText, 5);
         $userData = explode('#', $idUser);
 
         if($userData == [] || count($userData) != 2) {
             BotEcho::printError($discord, 'Укажите пользователя в формате Ник#Тег');
+            return;
         }
 
         $user = User::findByUsername($userData[0], $userData[1]);
         if($user === null) {
             BotEcho::printError($discord, 'Пользователь не найден');
+            return;
         }
 
         $yourUser = User::findByDiscordId($userSender);
         if($yourUser === null) {
             BotEcho::printError($discord, 'Похоже вас еще не внесли в базу');
+            return;
         }
 
-        if($yourUser->balance > 0) {
+        if($yourUser->balance <= 0) {
             BotEcho::printError($discord, 'У вас не достаточно монет');
+            return;
         }
 
         $isLike = ActivityHistory::getActivityByUser($userSender, ModelActivity::LIKE_ACTIVE);
         if($isLike) {
             BotEcho::printError($discord, 'Вы уже донатили');
+            return;
         }
 
         $userRecipient = $user->discord_id;
         $result = User::DonateMonet($userSender, $userRecipient);
-        
-
-        print_r($userData);
-
+        if($result) {
+            $date = new DateTime();
+            ActivityHistory::setActive($userSender, $date, ModelActivity::LIKE_ACTIVE);
+            $message = "**" . $userSenderUsername . "🪙 >> >> >> " . $userData[0] . "🪙**";
+            BotEcho::printSuccess($discord, $message);
+        } else {
+            BotEcho::printError($discord, 'Произошла ошибка выполнения команды **like**');
+        }
     }
 
     /**

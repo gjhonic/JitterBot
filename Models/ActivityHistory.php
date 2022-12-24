@@ -189,7 +189,6 @@ class ActivityHistory extends BaseModel
      * @return void
      */
     public static function setActive(
-        Discord $discord, 
         string $discord_id, 
         DateTime $date, 
         string $typeActivity
