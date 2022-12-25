@@ -25,7 +25,7 @@ class TextChannel
     public const ID_CHANEL_MEM = '1051775979334402098';
 
     //Id канала для управления ботом
-    public const ID_CHANEL_BOT = '1054734044321042432'; //'1054408436735021067';
+    public const ID_CHANEL_BOT = '1054408436735021067';
 
     //Id канала для управления музыкальным ботом
     public const ID_CHANNEL_MUSIC = '1051846781132079186';
@@ -33,7 +33,7 @@ class TextChannel
     //Id временного текстового канала
     public const ID_TIME_TEXT_CHANEL = '1054340896583335996';
     
-    public const ID_NEWS_CHANNEL = '1054734044321042432'; //'1051479087593574470';
+    public const ID_NEWS_CHANNEL = '1051479087593574470';
 
     /**
      * Метод обработки изменения состояния текстовых чатов
