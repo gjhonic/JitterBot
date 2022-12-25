@@ -224,4 +224,32 @@ class User extends BaseModel
 
         return $user;
     }
+
+    /**
+     * Метод поднимает уровень пользователя
+     *
+     * @param array $newLevel
+     * @return bool
+     */
+    public function levelUp(array $newLevel): bool
+    {
+        $newBalance = $this->balance - $newLevel['cost'];
+
+        $pdo = self::getPDO();
+        if($pdo === null){
+            LogService::setLog('Ошибка подключения к базе данных');
+            return false;
+        }
+
+        $query = "UPDATE `users`
+            SET `balance` = :balance,
+                `level` = `level` + 1
+            WHERE `id` = :id";
+        $params = [
+            ':id' => $this->id,
+            ':balance' => $newBalance
+        ];
+        $stmt = $pdo->prepare($query);
+        return $stmt->execute($params);
+    }
 }

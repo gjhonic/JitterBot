@@ -2,6 +2,7 @@
 
 namespace App\Commands;
 
+use App\Models\Level;
 use App\Services\LogService;
 use Discord\Discord;
 use Discord\Helpers\Collection;
@@ -224,7 +225,11 @@ class TextChannel
                 $this->spliteCommand($message, $discord);
             } else if($messageText == 'check_active') {
                 $this->checkActiveCommand($message, $discord);
-            }else {
+            } else if($messageText == 'check_level') {
+                $this->checkLevelCommand($message, $discord);
+            } else if($messageText == 'level_up') {
+                $this->levelUpCommand($message, $discord);
+            } else {
                 $this->notFoundCommand($discord);
             }
         }
@@ -351,6 +356,96 @@ class TextChannel
         $message .= 'Вы заработаете: ' . $countMonet . " 🪙";
 
         BotEcho::printSuccess($discord, $message);
+    }
+
+    /**
+     * Команда проверяте статус уровня
+     *
+     * @param Message $message
+     * @param Discord $discord
+     * @return void
+     */
+    public function checkLevelCommand(Message $message, Discord $discord)
+    {
+        $userId = $message->author->id;
+        $user = User::findByDiscordId($userId);
+
+        if($user === null) {
+            BotEcho::printError($discord, 'Похоже вас еще не внесли в базу');
+            return;
+        }
+
+        $level = $user->level;
+        $levelNext = $level + 1;
+
+        $levelData = Level::getLevel($level);
+
+        $messageLevel = 'Ваш текущий уровень: **' . $levelData['name'] . '**' . PHP_EOL;
+
+        if($levelNext == 9) {
+            $messageLevel .= 'Вы достигли максимального левела!' . PHP_EOL;
+        } else {
+            $levelData = Level::getLevel($levelNext);
+            $money = $levelData['cost'] - $user->balance;
+            $messageLevel .= 'Следующий уровень: **' . $levelData['name'] . '**' . PHP_EOL;
+            $messageLevel .= 'Осталось: **' . $money . '**🪙' . PHP_EOL;
+        }
+        BotEcho::printSuccess($discord, $messageLevel);
+    }
+
+    /**
+     * Команда увеличивает уровень
+     *
+     * @param Message $message
+     * @param Discord $discord
+     * @return void
+     */
+    public function levelUpCommand(Message $message, Discord $discord)
+    {
+        $userId = $message->author->id;
+        $user = User::findByDiscordId($userId);
+
+        if($user === null) {
+            BotEcho::printError($discord, 'Похоже вас еще не внесли в базу');
+            return;
+        }
+
+        if($user->level == 8) {
+            BotEcho::printError($discord, 'Похоже у вас крайний уровень');
+            return;
+        }
+
+        $nextLevel = $user->level + 1;
+
+        $levelData = Level::getLevel($nextLevel);
+        $levelOldData = Level::getLevel($user->level);
+
+        if($user->balance < $levelData['cost']) {
+            BotEcho::printError($discord, 'Не хватает монет');
+            return;
+        }
+
+        $result = $user->levelUp($levelData);
+
+        if($result) {
+
+            $channel = $discord->getChannel(self::ID_CHANEL_BOT);
+            $guild = $channel->guild;
+            $member = $guild->members->get('id', $userId);
+
+            $messageLevel = '**ПОЗДРАВЛЯЕМ НОВЫЙ УРОВЕНЬ**' . PHP_EOL;
+            $messageLevel .= '🎉🎊🎉🎊🎉🎊🎉🎊🎉🎊🎉🎊🎉🎊🎉🎊🎉' . PHP_EOL;
+            $messageLevel .= PHP_EOL;
+            $messageLevel .= 'Теперь вы: **' . $levelData['name'] . '**' . PHP_EOL;
+            BotEcho::printSuccess($discord, $messageLevel);
+
+            $member->addRole($levelOldData['id'])->done(function () use ($member, $levelData) {
+                $member->addRole($levelData['id']);
+            });
+
+        } else {
+            BotEcho::printError($discord, 'Произошла ошибка');
+        }
     }
 
     /**

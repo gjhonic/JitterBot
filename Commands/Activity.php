@@ -20,27 +20,27 @@ class Activity
         $dateYesterday = new DateTime();
         $dateYesterday->modify('-1 day');
 
-        // $users = User::getAll();
-        // $activities = ActivityHistory::getActivitiesByDate($dateYesterday);
-        // $activeDaily = Daily::getDailyByDate($dateYesterday);
-        
-        // foreach ($users AS $user) {
-        //     $user->initActivity($dateNow->format('Y-m-d'));
+        $users = User::getAll();
+        $activities = ActivityHistory::getActivitiesByDate($dateYesterday);
+        $activeDaily = Daily::getDailyByDate($dateYesterday);
 
-        //     if(!isset($activities[$user->discord_id])){
-        //         continue;
-        //     }
+        foreach ($users AS $user) {
+             $user->initActivity($dateNow->format('Y-m-d'));
 
-        //     $userActivity = $activities[$user->discord_id];
-        //     $balanceUser = $user->balance;
-        //     $balanceUser += $userActivity->getSumCount();
-            
-        //     if($userActivity->isCompleteDaily($activeDaily)){
-        //         $balanceUser += 3;
-        //     }
+             if(!isset($activities[$user->discord_id])){
+                 continue;
+             }
 
-        //     $user->setBalance($balanceUser);
-        // }
+             $userActivity = $activities[$user->discord_id];
+             $balanceUser = $user->balance;
+             $balanceUser += $userActivity->getSumCount();
+
+             if($userActivity->isCompleteDaily($activeDaily)){
+                 $balanceUser += 3;
+             }
+
+             $user->setBalance($balanceUser);
+        }
 
         $newDaily = Daily::genenerateNewTask($dateNow);
         if($newDaily){
