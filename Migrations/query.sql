@@ -73,7 +73,7 @@ CREATE TABLE `users` (
   `username` varchar(255) NOT NULL COMMENT 'Имя пользователя',
   `tag` varchar(5) NOT NULL COMMENT 'Тег пользователя',
   `level` int(11) NOT NULL DEFAULT '0' COMMENT 'Уровень пользователя',
-  `balance` int(11) NOT NULL DEFAULT '0' COMMENT 'Баланс пользователя',
+  `balance` int(11) NOT NULL DEFAULT 1 COMMENT 'Баланс пользователя',
   `created_at` int(11) NOT NULL COMMENT 'Дата создания пользователя'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
