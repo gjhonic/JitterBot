@@ -248,6 +248,8 @@ class TextChannel
         
         $helpString .= "2. **like [ИмяПользователя]#[Тег]** - Команда жертвует монеточкой другому пользователю" . PHP_EOL;
         $helpString .= "3. **check_active** - Команда показывает статус активностей" . PHP_EOL;
+        $helpString .= "4. **check_level** - Команда показывает статус уровня" . PHP_EOL;
+        $helpString .= "5. **level_up** - Команда поднимает уровень пользователя" . PHP_EOL;
 
         BotEcho::printSuccess($discord, $helpString);
     }
@@ -387,8 +389,13 @@ class TextChannel
         } else {
             $levelData = Level::getLevel($levelNext);
             $money = $levelData['cost'] - $user->balance;
-            $messageLevel .= 'Следующий уровень: **' . $levelData['name'] . '**' . PHP_EOL;
-            $messageLevel .= 'Осталось: **' . $money . '**🪙' . PHP_EOL;
+            $messageLevel .= 'Следующий уровень: **' . $levelData['name'] . '**' . PHP_EOL . PHP_EOL;
+            if($money > 0 ) {
+                $messageLevel .= 'Осталось: **' . $money . '**🪙' . PHP_EOL;
+            } else {
+                $messageLevel .= 'Вам хватает 🪙' . PHP_EOL;
+            }
+
         }
         BotEcho::printSuccess($discord, $messageLevel);
     }
@@ -434,12 +441,12 @@ class TextChannel
             $member = $guild->members->get('id', $userId);
 
             $messageLevel = '**ПОЗДРАВЛЯЕМ НОВЫЙ УРОВЕНЬ**' . PHP_EOL;
-            $messageLevel .= '🎉🎊🎉🎊🎉🎊🎉🎊🎉🎊🎉🎊🎉🎊🎉🎊🎉' . PHP_EOL;
+            $messageLevel .= '🎉🎊🎉🎊🎉🎊🎉🎊🎉🎊🎉🎊' . PHP_EOL;
             $messageLevel .= PHP_EOL;
             $messageLevel .= 'Теперь вы: **' . $levelData['name'] . '**' . PHP_EOL;
             BotEcho::printSuccess($discord, $messageLevel);
 
-            $member->addRole($levelOldData['id'])->done(function () use ($member, $levelData) {
+            $member->removeRole($levelOldData['id'])->done(function () use ($member, $levelData) {
                 $member->addRole($levelData['id']);
             });
 
@@ -464,9 +471,6 @@ class TextChannel
             $channelBot->sendMessage('Голосовой канал не найден 👻');
             return;
         }
-
-        $this->acceptCommand($discord);
-
 
         $arrayMembers = [];
 
@@ -509,6 +513,7 @@ class TextChannel
             });
         });
 
+        BotEcho::printSuccess($discord, 'Я вас разделил)');
         LogService::setLog('Пользователь: ' . $message->author->username . '. Запустил команду splite');
     }
 
@@ -520,23 +525,6 @@ class TextChannel
     private function notFoundCommand(Discord $discord)
     {
         BotEcho::printError($discord, 'Команда не найдена');
-    }
-
-    /**
-     * Бот понял команду и сейчас ее обработает
-     * @param Discord $discord
-     * @return void
-     */
-    private function acceptCommand(Discord $discord)
-    {
-        $array = [
-            '👌','👍','🍻','🥂','💪'
-        ];
-        $num = rand(0,4);
-        $emoji = $array[$num];
-
-        $channelBot = $discord->getChannel(self::ID_CHANEL_BOT);
-        $channelBot->sendMessage('Понял, принял щас всё будет ' . $emoji);
     }
 
     /**
