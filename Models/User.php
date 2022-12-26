@@ -13,6 +13,7 @@ class User extends BaseModel
     public $tag;
     public $level;
     public $balance;
+    public $rating;
     public $created_at;
 
 
@@ -49,6 +50,7 @@ class User extends BaseModel
         $user->tag = $result['tag'];
         $user->level = $result['level'];
         $user->balance = $result['balance'];
+        $user->rating = $result['rating'];
         $user->created_at = $dateTime->format('Y-m-d H:i:s');
 
         return $user;
@@ -88,6 +90,7 @@ class User extends BaseModel
             $user->tag = $item['tag'];
             $user->level = $item['level'];
             $user->balance = $item['balance'];
+            $user->rating = $item['rating'];
             $user->created_at = $dateTime->format('Y-m-d H:i:s');
 
             $users[$user->id] = $user;
@@ -116,10 +119,11 @@ class User extends BaseModel
 
         $this->balance = $balance;
 
-        $query = "UPDATE `users` SET `balance` = :balance WHERE `id` = :id";
+        $query = "UPDATE `users` SET `balance` = :balance, `rating` =:rating WHERE `id` = :id";
         $params = [
             ':id' => $this->id,
-            ':balance' => $balance
+            ':balance' => $balance,
+            ':rating' => $balance
         ];
         $stmt = $pdo->prepare($query);
         return $stmt->execute($params);
@@ -143,7 +147,6 @@ class User extends BaseModel
             return false;
         }
 
-        $name = 'Новая категория';
         $query = "INSERT INTO `activity_history` (`discord_id`, `date`) VALUES (:discord_id, :date)";
         $params = [
             ':discord_id' => $this->discord_id,
@@ -220,6 +223,7 @@ class User extends BaseModel
         $user->tag = $result['tag'];
         $user->level = $result['level'];
         $user->balance = $result['balance'];
+        $user->rating = $result['rating'];
         $user->created_at = $dateTime->format('Y-m-d H:i:s');
 
         return $user;
@@ -251,5 +255,43 @@ class User extends BaseModel
         ];
         $stmt = $pdo->prepare($query);
         return $stmt->execute($params);
+    }
+
+    /**
+     * Метод возвращает топ пользователей
+     *
+     * @return array|null
+     */
+    public static function getTopUser(): ?array
+    {
+        $pdo = self::getPDO();
+        if($pdo === null){
+            LogService::setLog('Ошибка подключения к базе данных');
+            return null;
+        }
+
+        $stmt = $pdo->prepare("SELECT * FROM users ORDER BY rating DESC LIMIT 3");
+        $stmt->execute();
+        $result = $stmt->fetchAll();
+
+        $dateTime = new DateTime();
+        $users = [];
+
+        foreach ($result as $item) {
+            $dateTime->setTimestamp((int)$item['created_at']);
+
+            $user = new Self();
+            $user->id = $item['id'];
+            $user->discord_id = $item['discord_id'];
+            $user->username = $item['username'];
+            $user->tag = $item['tag'];
+            $user->level = $item['level'];
+            $user->balance = $item['balance'];
+            $user->rating = $item['rating'];
+            $user->created_at = $dateTime->format('Y-m-d H:i:s');
+
+            $users[] = $user;
+        }
+        return $users;
     }
 }

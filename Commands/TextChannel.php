@@ -300,6 +300,11 @@ class TextChannel
             return;
         }
 
+        if($userSender == $user->discord_id) {
+            BotEcho::printError($discord, 'Ничего себе донат, самому себе');
+            return;
+        }
+
         $isLike = ActivityHistory::getActivityByUser($userSender, ModelActivity::LIKE_ACTIVE);
         if($isLike) {
             BotEcho::printError($discord, 'Вы уже донатили');
