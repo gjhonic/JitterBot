@@ -21,8 +21,7 @@ class LogCronService
         $discord = \SingleDiscord::getInstance();
         $channel = $discord->getChannel(self::getIdTextChannelCronLog());
 
-        $message = "Крон: **" . $this->cronName . "** ". PHP_EOL .">>> ";
-        $message .= "Время Запуска: *" . $this->dateStart . "*" . PHP_EOL;
+        $message = "Время Запуска: *" . $this->dateStart . "*" . PHP_EOL;
         $message .= "Время Остановки: *" . $this->dateStart . "*" . PHP_EOL;
         $message .= $this->message . PHP_EOL;
         if($this->isError) {
@@ -32,7 +31,7 @@ class LogCronService
 
         $embed = [
             'title' => "Крон: **" . $this->cronName . "** ",
-            'color' => 65297,
+            'color' => 13290186,
             'description' => $message,
             'footer' => [
                 'text' => 'jitterBot'
