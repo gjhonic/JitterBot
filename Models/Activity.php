@@ -30,4 +30,33 @@ class Activity
             self::ALWAYS_ACTIVE
         ];
     }
+
+    /**
+     * Метод возвращает мап активности и иконки
+     *
+     * @return array
+     */
+    public static function mapIcoActivity(): array
+    {
+        return [
+            self::VOICE_ACTIVE => '📣',
+            self::MESSAGE_ACTIVE => '💬',
+            self::LIKE_ACTIVE => '🪙',
+            self::MEM_ACTIVE => '🤣',
+            self::REACTION_ACTIVE => '👍',
+            self::MUSIC_ACTIVE => '🎵',
+            self::ALWAYS_ACTIVE => '🌐'
+        ];
+    }
+
+    /**
+     * Метод возвращает иконку активности
+     *
+     * @param string $activity
+     * @return string
+     */
+    public static function getIconActivity(string $activity):string
+    {
+        return self::mapIcoActivity()[$activity];
+    }
 }

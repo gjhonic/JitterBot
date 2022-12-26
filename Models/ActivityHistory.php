@@ -187,6 +187,49 @@ class ActivityHistory extends BaseModel
     }
 
     /**
+     * Возвращает историю активности на пользователя
+     *
+     * @param integer $discordId
+     * @param integer $historyDay
+     * @return ActivityHistory|null
+     */
+    public static function getActivitiesHistoryByUser(int $discordId, int $historyDay = 10): ?array
+    {
+        $pdo = self::getPDO();
+        if($pdo === null){
+            LogService::setLog('Ошибка подключения к базе данных');
+            return null;
+        }
+
+        $query = "SELECT * FROM activity_history WHERE `discord_id`=:discord_id ORDER BY date DESC LIMIT " . $historyDay;
+        $stmt = $pdo->prepare($query);
+        $stmt->execute([
+            'discord_id' => $discordId,
+        ]);
+        $result = $stmt->fetchAll();
+
+        $historyActivities = [];
+
+        foreach ($result as $item) {
+            $active = new self();
+            $active->id = $item['id'];
+            $active->discord_id = $item['discord_id'];
+            $active->date = $item['date'];
+            $active->voice_active = $item['voice_active'];
+            $active->message_active = $item['message_active'];
+            $active->like_active = $item['like_active'];
+            $active->mem_active = $item['mem_active'];
+            $active->reaction_active = $item['reaction_active'];
+            $active->music_active = $item['music_active'];
+            $active->always_active = $item['always_active'];
+
+            $historyActivities[] = $active;
+        }
+
+        return $historyActivities;
+    }
+
+    /**
      * Метод возвращает сумму баллов по активностям
      *
      * @return integer

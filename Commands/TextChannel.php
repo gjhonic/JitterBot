@@ -236,6 +236,8 @@ class TextChannel
                 $this->checkLevelCommand($message, $discord);
             } else if($messageText == 'level_up') {
                 $this->levelUpCommand($message, $discord);
+            } else if($messageText == 'active_history') {
+                $this->activeHistoryCommand($message, $discord);
             } else {
                 $this->notFoundCommand($discord);
             }
@@ -257,6 +259,7 @@ class TextChannel
         $helpString .= "3. **check_active** - Команда показывает статус активностей" . PHP_EOL;
         $helpString .= "4. **check_level** - Команда показывает статус уровня" . PHP_EOL;
         $helpString .= "5. **level_up** - Команда поднимает уровень пользователя" . PHP_EOL;
+        $helpString .= "6. **active_history** - Команда показывает историю активности за поледние 10 дней" . PHP_EOL;
 
         BotEcho::printSuccess($discord, $helpString);
     }
@@ -365,6 +368,48 @@ class TextChannel
         $message .= 'Вы заработаете: ' . $countMonet . " 🪙";
 
         BotEcho::printSuccess($discord, $message);
+    }
+
+    /**
+     * Метод показывает историю активности
+     *
+     * @param Message $message
+     * @param Discord $discord
+     * @return void
+     */
+    private function activeHistoryCommand(Message $message, Discord $discord)
+    {
+        $userId = $message->author->id;
+
+        $activities = ActivityHistory::getActivitiesHistoryByUser($userId, 10);
+
+        if($activities === null) {
+            BotEcho::printError($discord, 'Произошла ошибка получения истории активности');
+            return;
+        }
+
+        if($activities === []) {
+            BotEcho::printSuccess($discord, 'На вас пока нету истории');
+        }
+
+        $messageHistory = '**История ващей активности за 10 дней**' . PHP_EOL . PHP_EOL;
+        $messageHistory .= '+----------------+------+------+------+------+------+------+' .PHP_EOL;
+        $messageHistory .= '|-----Дата----| 📣 | 💬 | 🪙 | 🤣 | 👍 | 🎵 |' . PHP_EOL;
+        $messageHistory .= '+----------------+------+------+------+------+------+------+' . PHP_EOL;
+
+        foreach ($activities as $activity) {
+            $messageHistory .= '|' . $activity->date . '| ';
+            $messageHistory .= ($activity->voice_active ? '✅' : '❌') . ' | ';
+            $messageHistory .= ($activity->message_active ? '✅' : '❌') . ' | ';
+            $messageHistory .= ($activity->like_active ? '✅' : '❌') . ' | ';
+            $messageHistory .= ($activity->mem_active ? '✅' : '❌') . ' | ';
+            $messageHistory .= ($activity->reaction_active ? '✅' : '❌') . ' | ';
+            $messageHistory .=($activity->music_active ? '✅' : '❌') . '|';
+            $messageHistory .= PHP_EOL;
+            $messageHistory .= '+----------------+------+------+------+------+------+------+' . PHP_EOL;
+        }
+
+        BotEcho::printSuccess($discord, $messageHistory);
     }
 
     /**
