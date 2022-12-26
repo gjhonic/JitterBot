@@ -101,7 +101,9 @@ class TextChannel
 
     /**
      * Метод чистит временный текстовый чат
+     *
      * @param Discord $discord
+     * @param LogCronService $logCron
      * @return void
      */
     public function clearTimeTextChat(Discord $discord, LogCronService $logCron)
@@ -136,12 +138,11 @@ class TextChannel
                 }
 
                 $channel->deleteMessages($messagesIds)->done(function () use ($discord, $messageArray, $logCron) {
-                    $messagesStr = 'Бот отчистил временный чат' . PHP_EOL . 'Сообщений: ' . count($messageArray) . ' ```md' . PHP_EOL;
+                    $messagesStr = 'Бот отчистил временный чат' . PHP_EOL . 'Сообщений: ' . count($messageArray) . PHP_EOL;
                     foreach ($messageArray as $item) {
                         $messagesStr .= '[AuthorId:' . $item['author_id'] . '] ' .
                             $item['author'] . ' >>> ' . $item['content'] . PHP_EOL;
                     }
-                    $messagesStr .= '```';
 
                     LogService::setLog($messagesStr);
                     
@@ -159,16 +160,18 @@ class TextChannel
 
     /**
      * Метод чистит текстовый чат для ввоба команд боту
+     *
      * @param Discord $discord
+     * @param LogCronService $logCron
      * @return void
      */
-    public function clearBotTextChat(Discord $discord)
+    public function clearBotTextChat(Discord $discord, LogCronService $logCron)
     {
         try {
             $channel = $discord->getChannel(self::ID_CHANEL_BOT);
 
             $channel->getMessageHistory([
-            ])->done(function (Collection $messages) use ($discord, $channel) {
+            ])->done(function (Collection $messages) use ($discord, $channel, $logCron) {
 
                 $messageArray = [];
                 $messagesIds = [];
@@ -190,15 +193,19 @@ class TextChannel
                     $discord->close();
                 }
 
-                $channel->deleteMessages($messagesIds)->done(function () use ($discord, $messageArray) {
-                    $messagesStr = 'Бот отчистил bot чат' . PHP_EOL . 'Сообщений: ' . count($messageArray) . ' ```md' . PHP_EOL;
+                $channel->deleteMessages($messagesIds)->done(function () use ($discord, $messageArray, $logCron) {
+                    $messagesStr = 'Бот отчистил bot чат' . PHP_EOL . 'Сообщений: ' . count($messageArray) . PHP_EOL;
                     foreach ($messageArray as $item) {
                         $messagesStr .= '[AuthorId:' . $item['author_id'] . '] ' .
                             $item['author'] . ' >>> ' . $item['content'] . PHP_EOL;
                     }
-                    $messagesStr .= '```';
 
                     LogService::setLog($messagesStr);
+
+                    $logCron->message = 'Крон отчистил bot чат';
+                    $dateEnd = new DateTime();
+                    $logCron->dateFinish = $dateEnd->format('Y-m-d H:i:s');
+                    $logCron->writeLog();
                 });
             });
 

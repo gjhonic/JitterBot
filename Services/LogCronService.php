@@ -30,7 +30,16 @@ class LogCronService
             $message .= "```". $this->errorMessage . "```" . PHP_EOL;
         }
 
-        $channel->sendMessage($message)->done(function () use ($discord) {
+        $embed = [
+            'title' => "Крон: **" . $this->cronName . "** ",
+            'color' => 65297,
+            'description' => $message,
+            'footer' => [
+                'text' => 'jitterBot'
+            ],
+        ];
+
+        $channel->sendMessage('', false, $embed)->done(function () use ($discord) {
             $discord->close();
         });
     }

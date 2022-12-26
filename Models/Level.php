@@ -8,6 +8,7 @@ class Level extends BaseModel
 {
     /**
      * Метод возвращает уровни
+     *
      * @return array
      */
     public static function getDataLevels(): array
@@ -17,7 +18,7 @@ class Level extends BaseModel
                 'name' => 'zero',
                 'id' => '1056457050416218184',
                 'description' => '',
-                'cost' => 10
+                'cost' => 0
             ],
             1 => [
               'name' => 'Человек',
@@ -72,6 +73,7 @@ class Level extends BaseModel
 
     /**
      * Метод возвращает информацию об уровне пользователя
+     *
      * @param int $level
      * @return array
      */

@@ -22,12 +22,20 @@ class LogService
     {
         $discord = \SingleDiscord::getInstance();
         $channel = $discord->getChannel(self::getIdTextChannelLog());
+        $embed = [
+            'title' => 'Лог',
+            'color' => 13290186,
+            'description' => $message,
+            'footer' => [
+                'text' => 'jitterBot'
+            ],
+        ];
         if($isDie == true) {
-            $channel->sendMessage($message)->done(function () use ($discord) {
+            $channel->sendMessage('', false, $embed)->done(function () use ($discord) {
                 $discord->close();
             });
         } else {
-            $channel->sendMessage($message);
+            $channel->sendMessage('', false, $embed);
         }
 
     }
