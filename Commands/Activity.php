@@ -59,106 +59,17 @@ class Activity
 
     public function updateRating(Discord $discord, LogCronService $logCron)
     {
+        $topUsers = User::getTopUser();
+
         $date = new DateTime();
-        $users = Rating::getTopUsersByTime($date);
-
-        $roleTopId = Rating::getRoleTopMember()['id'];
-
-        $channel = $discord->getChannel(TextChannel::ID_NEWS_CHANNEL);
-        $guild = $channel->guild;
-
-        if($users != []) {
-
-            $member1r = $guild->members->get('id', $users[0]);
-            $member2r = $guild->members->get('id', $users[1]);
-            $member3r = $guild->members->get('id', $users[2]);
-
-            $member1r->removeRole($roleTopId)->done(function () use ($roleTopId, $member2r, $member3r, $logCron) {
-                $member2r->removeRole($roleTopId)->done(function () use ($roleTopId, $member3r, $logCron) {
-                    $member3r->removeRole($roleTopId)->done(function (Discord $discord) use ($logCron) {
-
-                        $topUsers = User::getTopUser();
-                        $channel = $discord->getChannel(TextChannel::ID_NEWS_CHANNEL);
-                        $guild = $channel->guild;
-
-                        $roleTopId = Rating::getRoleTopMember()['id'];
-
-                        if($topUsers == []) {
-                            $logCron->addErrorMessage('Не найдены топ3 пользователя');
-                            BotEcho::printError($discord, 'Не найдены топ3 пользователя');
-                            return;
-                        }
-
-                        $userId1 = $topUsers[0]->discord_id;
-                        $userId2 = $topUsers[1]->discord_id;
-                        $userId3 = $topUsers[2]->discord_id;
-
-                        $member1 = $guild->members->get('id', $userId1);
-                        $member1->addRole($roleTopId)->done(function () use ($roleTopId, $guild, $userId2, $userId3, $logCron, $topUsers) {
-                            $member2 = $guild->members->get('id', $userId2);
-                            $member2->addRole($roleTopId)->done(function () use ($roleTopId, $guild, $userId3, $logCron, $topUsers) {
-                                $member3 = $guild->members->get('id', $userId3);
-
-                                $member3->addRole($roleTopId)->done(function (Discord $discord) use ($logCron, $topUsers){
-                                    $date = new DateTime();
-                                    $isSet = Rating::setTopUsers($date, $topUsers);
-                                    if($isSet) {
-                                        $this->publicateRating($discord, $topUsers);
-                                    }
-                                    $logCron->message = 'Крон обновил рейтинг лучщих пользователей';
-                                    $dateEnd = new DateTime();
-                                    $logCron->dateFinish = $dateEnd->format('Y-m-d H:i:s');
-                                    $logCron->writeLog();
-                                });
-
-                            });
-                        });
-
-
-                    });
-                });
-            });
-
-        } else {
-            $topUsers = User::getTopUser();
-            $channel = $discord->getChannel(TextChannel::ID_NEWS_CHANNEL);
-            $guild = $channel->guild;
-
-            $roleTopId = Rating::getRoleTopMember()['id'];
-
-            if($topUsers == []) {
-                $logCron->addErrorMessage('Не найдены топ3 пользователя');
-                BotEcho::printError($discord, 'Не найдены топ3 пользователя');
-                return;
-            }
-
-            $userId1 = $topUsers[0]->discord_id;
-            $userId2 = $topUsers[1]->discord_id;
-            $userId3 = $topUsers[2]->discord_id;
-
-            $member1 = $guild->members->get('id', $userId1);
-            $member1->addRole($roleTopId)->done(function () use ($roleTopId, $guild, $userId2, $userId3, $logCron, $topUsers) {
-                $member2 = $guild->members->get('id', $userId2);
-                $member2->addRole($roleTopId)->done(function () use ($roleTopId, $guild, $userId3, $logCron, $topUsers) {
-                    $member3 = $guild->members->get('id', $userId3);
-
-                    $member3->addRole($roleTopId)->done(function (Discord $discord) use ($logCron, $topUsers){
-                        $date = new DateTime();
-                        $isSet = Rating::setTopUsers($date, $topUsers);
-                        if($isSet) {
-                            $this->publicateRating($discord, $topUsers);
-                        }
-                        $logCron->message = 'Крон обновил рейтинг лучщих пользователей';
-                        $dateEnd = new DateTime();
-                        $logCron->dateFinish = $dateEnd->format('Y-m-d H:i:s');
-                        $logCron->writeLog();
-                    });
-
-                });
-            });
+        $isSet = Rating::setTopUsers($date, $topUsers);
+        if($isSet) {
+            $this->publicateRating($discord, $topUsers);
         }
-
-
+        $logCron->message = 'Крон обновил рейтинг лучщих пользователей';
+        $dateEnd = new DateTime();
+        $logCron->dateFinish = $dateEnd->format('Y-m-d H:i:s');
+        $logCron->writeLog();
     }
 
     /**
