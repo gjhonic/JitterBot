@@ -520,6 +520,7 @@ class TextChannel
 
     /**
      * Обработка команды разделения на команды
+     *
      * @param Message $message
      * @param Discord $discord
      * @return void

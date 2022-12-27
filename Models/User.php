@@ -66,16 +66,12 @@ class User extends BaseModel
         $pdo = self::getPDO();
         if($pdo === null){
             LogService::setLog('Ошибка подключения к базе данных');
-            return [];
+            return null;
         }
 
         $stmt = $pdo->prepare("SELECT * FROM users");
         $stmt->execute();
         $result = $stmt->fetchAll();
-
-        if ($result == []) {
-            return [];
-        }
 
         $users = [];
         $dateTime = new DateTime();
@@ -83,7 +79,7 @@ class User extends BaseModel
         foreach ($result as $item) {
             $dateTime->setTimestamp((int)$item['created_at']);
 
-            $user = new Self();
+            $user = new self();
             $user->id = $item['id'];
             $user->discord_id = $item['discord_id'];
             $user->username = $item['username'];
@@ -132,10 +128,10 @@ class User extends BaseModel
     /**
      * Метод инициализирует активность пользователя
      *
-     * @param string $date
+     * @param DateTime $date
      * @return void
      */
-    public function initActivity(string $date)
+    public function initActivity(DateTime $date)
     {
         if(empty($this->discord_id)){
             return false;
@@ -150,7 +146,7 @@ class User extends BaseModel
         $query = "INSERT INTO `activity_history` (`discord_id`, `date`) VALUES (:discord_id, :date)";
         $params = [
             ':discord_id' => $this->discord_id,
-            ':date' => $date,
+            ':date' => $date->format('Y-m-d'),
         ];
         $stmt = $pdo->prepare($query);
         $stmt->execute($params);

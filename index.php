@@ -2,7 +2,7 @@
 
 require_once __DIR__ . '/autoload.php';
 
-use App\Commands\Reactions;
+use App\Commands\Reaction;
 use App\Commands\TextChannel;
 use App\Commands\VoiceChannel;
 use Discord\Discord;
@@ -27,7 +27,7 @@ $discord->on('ready', function (Discord $discord) {
     });
 
     $discord->on(Event::MESSAGE_REACTION_ADD, function (MessageReaction $reaction, Discord $discord) {
-        $reactionCommand = new Reactions();
+        $reactionCommand = new Reaction();
         $reactionCommand->process($discord, $reaction);
     });
 });

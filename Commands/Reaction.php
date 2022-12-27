@@ -11,7 +11,7 @@ use App\Models\ActivityHistory;
 /**
  * Команда для работы с реакциями
  */
-class Reactions
+class Reaction
 {
     public function process(Discord $discord, MessageReaction $reactions)
     {

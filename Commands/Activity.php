@@ -26,7 +26,7 @@ class Activity
         $activeDaily = Daily::getDailyByDate($dateYesterday);
 
         foreach ($users AS $user) {
-             $user->initActivity($dateNow->format('Y-m-d'));
+             $user->initActivity($dateNow);
 
              if(!isset($activities[$user->discord_id])){
                  continue;
@@ -121,7 +121,7 @@ class Activity
         $embed = [
             'title' => '🎊Бравые ребята🎊',
             'color' => 14745344,
-            'description' => '👑 Рейтинг топовый участников канала на **' . $date->format('Y-m-d') . '** ' . PHP_EOL,
+            'description' => '👑 Рейтинг топовых участников канала на **' . $date->format('Y-m-d') . '** ' . PHP_EOL,
             'footer' => [
                 'text' => 'jitterBot'
             ],
