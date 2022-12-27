@@ -37,9 +37,9 @@ class TextChannel
 
     /**
      * Метод обработки изменения состояния текстовых чатов
-     * @param VoiceStateUpdate $state
+     *
+     * @param Message $message
      * @param Discord $discord
-     * @param $oldstate
      * @return void
      * @throws \Discord\Http\Exceptions\NoPermissionsException
      */
@@ -72,6 +72,7 @@ class TextChannel
 
     /**
      * Метод добавляет реацию на хороший мем
+     *
      * @param Message $message
      * @return void
      * @throws \Discord\Http\Exceptions\NoPermissionsException
@@ -87,6 +88,7 @@ class TextChannel
 
     /**
      * Метод возвращает рандомные реакции
+     *
      * @return array
      */
     private function getRandomReactions(): array
@@ -216,6 +218,7 @@ class TextChannel
 
     /**
      * Метод обрабатывает команды с текстового канала бот
+     *
      * @param Message $message
      * @param Discord $discord
      * @return void
@@ -239,13 +242,14 @@ class TextChannel
             } else if($messageText == 'active_history') {
                 $this->activeHistoryCommand($message, $discord);
             } else {
-                $this->notFoundCommand($discord);
+                $this->notFoundCommand($message, $discord);
             }
         }
     }
 
     /**
      * Возвращает список команд бота
+     *
      * @param Message $message
      * @param Discord $discord
      * @return void
@@ -262,10 +266,12 @@ class TextChannel
         $helpString .= "6. **active_history** - Команда показывает историю активности за поледние 10 дней" . PHP_EOL;
 
         BotEcho::printSuccess($discord, $helpString);
+        User::incCountHelp($message->author->id);
     }
 
     /**
      * Комада жертвует монеточкой
+     *
      * @param Message $message
      * @param Discord $discord
      * @return void
@@ -576,16 +582,20 @@ class TextChannel
 
     /**
      * Обработка команды команда не найдена
+     *
+     * @param Message $message
      * @param Discord $discord
      * @return void
      */
-    private function notFoundCommand(Discord $discord)
+    private function notFoundCommand(Message $message, Discord $discord)
     {
         BotEcho::printError($discord, 'Команда не найдена');
+        User::incCountFailed($message->author->id);
     }
 
     /**
      * Метод возвращает рандомные названия
+     *
      * @param int $countName
      * @return array
      */
@@ -593,7 +603,7 @@ class TextChannel
     {
         $array = [
             'Береженые лохи 🤓', 'Сыны Миража 🏜', 'Бравые ребята 💪', 'Ночные мортышки 🐒', 'Мстители 🛡',
-            'Аимщики', 'Без Димы', 'Бородачи 🧔', 'Люди в черном 🕶', 'Однояйцевые 🥚'
+            'Аимщики', 'Без Димы', 'Бородачи 🧔', 'Люди в черном 🕶', 'Однояйцевые 🥚', 'Владимирский централ'
         ];
         shuffle($array);
         return array_slice($array,0, $countName);

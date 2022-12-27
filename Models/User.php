@@ -59,7 +59,7 @@ class User extends BaseModel
     /**
      * Метод возвращает всех пользователь 
      *
-     * @return array
+     * @return array|null
      */
     public static function getAll(): ?array
     {
@@ -293,5 +293,51 @@ class User extends BaseModel
             $users[] = $user;
         }
         return $users;
+    }
+
+    /**
+     * Увеличивает количество введеных help команд
+     *
+     * @param int $discordId
+     * @return void
+     */
+    public static function incCountHelp(int $discordId)
+    {
+        $pdo = self::getPDO();
+        if($pdo === null){
+            LogService::setLog('Ошибка подключения к базе данных');
+            return false;
+        }
+
+        $query = "UPDATE `users` SET `count_help`=`count_help` + 1 
+        WHERE `discord_id`=:discord_id";
+        $params = [
+            ':discord_id' => $discordId,
+        ];
+        $stmt = $pdo->prepare($query);
+        $stmt->execute($params);
+    }
+
+    /**
+     * Увеличивает количество не верно введенных команд
+     *
+     * @param int $discordId
+     * @return void
+     */
+    public static function incCountFailed(int $discordId)
+    {
+        $pdo = self::getPDO();
+        if($pdo === null){
+            LogService::setLog('Ошибка подключения к базе данных');
+            return false;
+        }
+
+        $query = "UPDATE `users` SET `count_failed`=`count_failed` + 1 
+        WHERE `discord_id`=:discord_id";
+        $params = [
+            ':discord_id' => $discordId,
+        ];
+        $stmt = $pdo->prepare($query);
+        $stmt->execute($params);
     }
 }
