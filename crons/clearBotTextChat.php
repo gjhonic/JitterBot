@@ -10,7 +10,7 @@ $dateTime->modify('+5 hour');
 
 $discord = SingleDiscord::getInstance();
 $logCron = new LogCronService();
-$logCron->cronName = 'Чистка временного чата';
+$logCron->cronName = 'Чистка bot чата';
 $logCron->dateStart = $dateTime->format('Y-m-d H:i:s');
 
 $discord->on('ready', function () use ($discord, $logCron) {
