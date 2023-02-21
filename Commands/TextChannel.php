@@ -25,7 +25,7 @@ class TextChannel
     public const ID_CHANEL_MEM = '1051775979334402098';
 
     //Id канала для управления ботом
-    public const ID_CHANEL_BOT = '1054408436735021067';
+    public const ID_CHANEL_BOT = '1054734044321042432'; //'1054408436735021067';
 
     //Id канала для управления музыкальным ботом
     public const ID_CHANNEL_MUSIC = '1051846781132079186';

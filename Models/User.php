@@ -7,15 +7,18 @@ use App\Services\LogService;
 
 class User extends BaseModel
 {
-    public $id;
-    public $discord_id;
-    public $username;
-    public $tag;
-    public $level;
-    public $balance;
-    public $rating;
-    public $created_at;
+    public static string $tableName = 'users';
 
+    public int $id;
+    public string $discord_id;
+    public string $username;
+    public string $tag;
+    public int $level;
+    public int $balance;
+    public int $rating;
+    public bool $count_help;
+    public bool $count_failed;
+    public $created_at;
 
     /**
      * Метод находит пользователя по username и tag
@@ -83,10 +86,49 @@ class User extends BaseModel
             $user->id = $item['id'];
             $user->discord_id = $item['discord_id'];
             $user->username = $item['username'];
-            $user->tag = $item['tag'];
-            $user->level = $item['level'];
-            $user->balance = $item['balance'];
-            $user->rating = $item['rating'];
+            $user->tag = (int)$item['tag'];
+            $user->level = (int)$item['level'];
+            $user->balance = (int)$item['balance'];
+            $user->rating = (int)$item['rating'];
+            $user->count_help = (int)$item['count_help'];
+            $user->count_failed = (int)$item['count_failed'];
+            $user->created_at = $dateTime->format('Y-m-d H:i:s');
+
+            $users[$user->id] = $user;
+        }
+
+        return $users;
+    }
+
+    /**
+     * Метод возвращает всех пользователь
+     *
+     * @return array|null
+     */
+    public static function findAll(): ?array
+    {
+        $data = parent::findAll();
+
+        if($data === null) {
+            return null;
+        }
+
+        $users = [];
+        $dateTime = new DateTime();
+
+        foreach ($data as $item) {
+            $dateTime->setTimestamp((int)$item['created_at']);
+
+            $user = new self();
+            $user->id = (int)$item['id'];
+            $user->discord_id = (string)$item['discord_id'];
+            $user->username = (string)$item['username'];
+            $user->tag = (string)$item['tag'];
+            $user->level = (int)$item['level'];
+            $user->balance = (int)$item['balance'];
+            $user->rating = (int)$item['rating'];
+            $user->count_help = (int)$item['count_help'];
+            $user->count_failed = (int)$item['count_failed'];
             $user->created_at = $dateTime->format('Y-m-d H:i:s');
 
             $users[$user->id] = $user;

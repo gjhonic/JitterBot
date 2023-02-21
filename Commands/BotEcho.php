@@ -7,7 +7,7 @@ use Discord\Discord;
 class BotEcho
 {
 
-    public const ID_BOT_CHANNEL = '1054408436735021067';
+    public const ID_BOT_CHANNEL = '1054734044321042432'; //'1054408436735021067';
 
     /**
      * Метод пишет ошибку в чат бота
