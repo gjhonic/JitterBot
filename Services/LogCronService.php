@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+/**
+ * Сервис для логирования кронов
+ */
 class LogCronService
 {
     public string $cronName;

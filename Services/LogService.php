@@ -2,8 +2,9 @@
 
 namespace App\Services;
 
-use Discord\Discord;
-
+/**
+ * Сервис для логирования
+ */
 class LogService
 {
     private static function getIdTextChannelLog(): string
@@ -29,7 +30,7 @@ class LogService
                 'text' => 'jitterBot'
             ],
         ];
-        if($isDie == true) {
+        if ($isDie == true) {
             $channel->sendMessage('', false, $embed)->done(function () use ($discord) {
                 $discord->close();
             });

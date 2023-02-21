@@ -3,7 +3,6 @@
 namespace App\Commands;
 
 use App\Services\LogService;
-use DateTime;
 use Discord\Discord;
 use Discord\Parts\Channel\Channel;
 use Discord\Parts\WebSockets\VoiceStateUpdate;
