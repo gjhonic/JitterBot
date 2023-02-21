@@ -13,7 +13,6 @@ class LogService
 
     /**
      * Метод пишет лог в канал логов
-     * @param Discord $discord
      * @param string $message
      * @return void
      * @throws \Discord\Http\Exceptions\NoPermissionsException

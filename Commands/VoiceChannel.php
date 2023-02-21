@@ -2,14 +2,11 @@
 
 namespace App\Commands;
 
-use App\Models\ActivityHistory;
 use App\Services\LogService;
 use DateTime;
 use Discord\Discord;
 use Discord\Parts\Channel\Channel;
-use Discord\Parts\Guild\AutoModeration\Action;
 use Discord\Parts\WebSockets\VoiceStateUpdate;
-use App\Models\Activity as ModelActivity;
 
 /**
  * Команды для работы с голосовыми чатами
@@ -18,6 +15,8 @@ class VoiceChannel
 {
     //Id канала для создания канала
     public const ID_CHANEL_FOR_CREATE = '1054000370516504636';
+
+    //Id Категории "Личные комнаты"
     public const ID_CATEGORY_VOICE_CHANNEL = '1051844725663072347';
 
     /**
@@ -30,27 +29,22 @@ class VoiceChannel
      */
     public function process(VoiceStateUpdate $state, Discord $discord, $oldstate)
     {
-        if($state->member->user->bot){
-            return;
-        }
-        
-        if($oldstate != null) {
+        if ($oldstate != null) {
             $guild = $oldstate->guild;
             $channel = $discord->getChannel($oldstate->channel_id);
-            if(count($channel->members) == 0 && $channel->parent_id == self::ID_CATEGORY_VOICE_CHANNEL) {
+            if (count($channel->members) == 0 && $channel->parent_id == self::ID_CATEGORY_VOICE_CHANNEL) {
                 $guild->channels->delete($channel->id)->done(function (Channel $channel) {
                     LogService::setLog('Удален голосовой канал: ' . $channel->name);
                 });
             }
         }
 
-        if($state->channel_id === self::ID_CHANEL_FOR_CREATE) {
-            $this->createPersonalVoiceChanel($discord, $state->member);
+        if ($state->member->user->bot){
+            return;
         }
 
-        if($state->member->user) {
-            $date = new DateTime();
-            ActivityHistory::setActive($state->member->user->id, $date, ModelActivity::VOICE_ACTIVE);
+        if ($state->channel_id === self::ID_CHANEL_FOR_CREATE) {
+            $this->createPersonalVoiceChanel($discord, $state->member);
         }
     }
 
@@ -77,7 +71,8 @@ class VoiceChannel
         $user = $member->user;
 
         $guild->channels->save($newChannel)->done(function(Channel $channel) use ($user, $member) {
-            LogService::setLog('Пользователь: ' . $user->username . '. Создал голосовой канал: ' . $channel->name);
+            LogService::setLog('Пользователь: ' . $user->username . '. Создал голосовой канал: ' .
+                $channel->name);
             $channel->moveMember($user->id)->done(function () {});
             $channel->setPermissions($member, [
                 'mute_members', 'deafen_members', 'move_members', 'kick_members', 'manage_channels'

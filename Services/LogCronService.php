@@ -24,7 +24,7 @@ class LogCronService
         $message = "Время Запуска: *" . $this->dateStart . "*" . PHP_EOL;
         $message .= "Время Остановки: *" . $this->dateStart . "*" . PHP_EOL;
         $message .= $this->message . PHP_EOL;
-        if($this->isError) {
+        if ($this->isError) {
             $message .= "**Во время выполнения произошла ошибка**" . PHP_EOL;
             $message .= "```". $this->errorMessage . "```" . PHP_EOL;
         }
@@ -41,16 +41,5 @@ class LogCronService
         $channel->sendMessage('', false, $embed)->done(function () use ($discord) {
             $discord->close();
         });
-    }
-
-    /**
-     * Метод пишет ошибку
-     *
-     * @param string $message
-     * @return void
-     */
-    public function addErrorMessage(string $message)
-    {
-        $this->errorMessage .= $message . PHP_EOL;
     }
 }
